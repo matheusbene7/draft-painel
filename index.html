@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Painel DRAFT</title>
+<meta name="theme-color" content="#0D0E10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DRAFT">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: cabeçalho fixo com abas tipo placar; conteúdo em linhas (não cards), resumo antes do detalhe */
+:root{
+  --bg:#0D0E10; --panel:#15171A; --line:#25282D; --fg:#ECEDEE; --mut:#8C9199;
+  --acc:#E2B33C; --acc-ink:#111; --pos:#55B880; --neg:#E2685A; --info:#7BA7D9;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#F4F4F2; --panel:#FFFFFF; --line:#E0E0DC; --fg:#15161A; --mut:#676B73;
+  --acc:#A97B10; --acc-ink:#fff; --pos:#2C8A55; --neg:#C04637; --info:#2F6AA8; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#F4F4F2; --panel:#FFFFFF; --line:#E0E0DC; --fg:#15161A; --mut:#676B73;
+  --acc:#A97B10; --acc-ink:#fff; --pos:#2C8A55; --neg:#C04637; --info:#2F6AA8; color-scheme:light}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+main{padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:12px;padding-block:14px 10px}
+.mark{width:38px;height:38px;background:#000;color:#fff;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--display);letter-spacing:.04em;flex:none;border:1px solid var(--line)}
+.mark span{display:block;text-align:center}
+.mark i{display:block;height:2px;width:20px;background:#E2B33C;margin:2px auto}
+.brand{min-width:0}
+.brand b{font:700 20px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;display:block}
+.brand small{color:var(--mut);font-size:12px}
+.top .sp{flex:1}
+.ghost{background:none;border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-size:13px;color:var(--mut)}
+.ghost:hover{color:var(--fg);border-color:var(--mut)}
+nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-bottom:-1px}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px 10px;font:600 15px/1 var(--display);letter-spacing:.07em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--acc)}
+
+main{padding-block:20px 64px}
+.note{font-size:13px;color:var(--mut);border:1px dashed var(--line);padding:8px 12px;border-radius:4px;margin-bottom:16px}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.bar h2{font:700 24px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0;flex:1;min-width:0}
+.add{background:var(--acc);color:var(--acc-ink);border:0;border-radius:4px;padding:8px 14px;font-weight:600;font-size:14px}
+.month{display:flex;align-items:center;border:1px solid var(--line);border-radius:4px}
+.month button{background:none;border:0;padding:6px 10px;color:var(--mut);font-size:16px}
+.month span{min-width:96px;text-align:center;font-weight:600;font-size:14px;text-transform:capitalize}
+h3{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:28px 0 10px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+.kpi{padding:14px 16px;border-left:1px solid var(--line);min-width:0}
+.kpi:first-child{border-left:0}
+.kpi label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px}
+.kpi b{font:700 24px/1.1 var(--display);letter-spacing:.02em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi em{font-style:normal;font-size:12px;color:var(--mut)}
+@media (max-width:640px){.kpis{grid-template-columns:1fr 1fr}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--line)}}
+
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.rows{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 2px;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;align-items:center}
+button.row:hover{background:var(--panel)}
+.row .t{font-weight:600;min-width:0;overflow-wrap:anywhere}
+.row .s{grid-column:1;font-size:13px;color:var(--mut);min-width:0;overflow-wrap:anywhere}
+.row .r{grid-row:1 / span 2;grid-column:2;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.row .v{font-weight:600;white-space:nowrap}
+.date{display:grid;grid-template-columns:52px 1fr auto;gap:12px}
+.date .d{grid-row:1 / span 2;text-align:center;border-right:1px solid var(--line);padding-right:10px}
+.date .d b{font:700 22px/1 var(--display);display:block}
+.date .d small{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.date .t,.date .s{grid-column:2}
+.date .r{grid-column:3}
+.pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+.p-mut{color:var(--mut)} .p-acc{color:var(--acc)} .p-pos{color:var(--pos)} .p-neg{color:var(--neg)} .p-info{color:var(--info)}
+.empty{padding:28px 4px;color:var(--mut);border-bottom:1px solid var(--line);font-size:14px}
+.empty b{color:var(--fg);display:block;margin-bottom:2px}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:none;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px;color:var(--mut)}
+.chip[aria-pressed="true"]{border-color:var(--fg);color:var(--fg)}
+.search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 12px;margin-bottom:12px}
+
+.two{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
+.two>div{min-width:0}
+@media (max-width:760px){.two{grid-template-columns:1fr;gap:0}}
+.funnel{display:flex;height:10px;border-radius:2px;overflow:hidden;background:var(--line);margin:4px 0 10px}
+.funnel i{display:block;height:100%}
+.legend{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px}
+.legend span{display:flex;align-items:center;gap:8px;min-width:0}
+.legend span::before{content:"";width:8px;height:8px;border-radius:1px;background:var(--c);flex:none}
+.split{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:4px}
+.split div{padding:12px 14px;border-left:1px solid var(--line);min-width:0}
+.split div:first-child{border-left:0}
+.split label{font-size:13px;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.split b{font:700 20px/1.2 var(--display);display:block}
+.split em{font-style:normal;font-size:12px;color:var(--mut)}
+@media (max-width:480px){.split{grid-template-columns:1fr}.split div{border-left:0;border-top:1px solid var(--line)}.split div:first-child{border-top:0}}
+.chart{overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:420px;height:auto}
+.key{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-top:6px}
+.key span::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:var(--c)}
+
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet form{background:var(--bg);border:1px solid var(--line);width:100%;max-width:560px;max-height:92%;overflow-y:auto;border-radius:8px 8px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+@media (min-width:700px){.sheet{align-items:center}.sheet form{border-radius:6px}}
+.sheet h2{font:700 22px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0 0 16px}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.f .full{grid-column:1 / -1}
+.f label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut);min-width:0}
+.f input,.f select,.f textarea{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 10px;font-size:15px;color:var(--fg);width:100%;min-width:0}
+.f textarea{min-height:70px;resize:vertical}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{flex-direction:row;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-size:14px;color:var(--fg)}
+.actions{display:flex;gap:8px;margin-top:18px;align-items:center}
+.actions .sp{flex:1}
+.del{background:none;border:1px solid var(--line);color:var(--neg);border-radius:4px;padding:8px 12px;font-size:14px}
+.del.armed{background:var(--neg);color:#fff;border-color:var(--neg)}
+.cancel{background:none;border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:14px}
+.err{color:var(--neg);font-size:13px;margin-top:10px}
+.row.st{position:relative}
+.row.st:hover{background:var(--panel)}
+.open{background:none;border:0;padding:0;font-weight:600;text-align:left;cursor:pointer;color:var(--fg)}
+.open::after{content:"";position:absolute;inset:0}
+.open:focus-visible{outline:0}.open:focus-visible::after{outline:2px solid var(--acc);outline-offset:-2px}
+.ig{position:relative;z-index:1;color:var(--acc);font-weight:500;text-decoration:none;white-space:nowrap}
+.ig:hover{text-decoration:underline}
+.iglink{font-size:13px;color:var(--acc);text-decoration:none;margin-top:4px}
+.late{color:var(--neg)}
+.actions{flex-wrap:wrap}
+.hint{font-size:12px;color:var(--mut)}
+.tips{display:grid;gap:8px}
+.tip p{max-width:68ch;color:var(--mut);margin:0 0 10px}
+.tip ul,.tip ol{margin:0;padding-left:20px;display:grid;gap:10px;max-width:70ch}
+.tip li b{display:block}
+.tip li span{color:var(--mut)}
+.ref{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.ref div{padding:12px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.ref b{display:block;margin-bottom:2px}
+.ref small{color:var(--mut);font-size:13px;display:block}
+@media (max-width:420px){.f{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+ .login{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.login>div{display:grid;gap:14px;justify-items:center;text-align:center;max-width:340px}
+.login .mark{width:72px;height:72px;font-size:22px}
+.login .mark i{width:38px;height:3px}
+.login h1{font:700 30px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;margin:6px 0 0}
+.login p{color:var(--mut);margin:0;font-size:14px}
+.gbtn{display:flex;align-items:center;gap:10px;background:var(--fg);color:var(--bg);border:0;border-radius:4px;padding:11px 18px;font-weight:600;font-size:15px}
+.who{font-size:12px;color:var(--mut);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:480px){.who{display:none}}
+</style>
+</head>
+<body>
+<div class="login" id="login" hidden><div>
+  <div class="mark" aria-hidden="true"><div><span>DR</span><i></i><span>FT</span></div></div>
+  <h1>Draft</h1>
+  <p>Painel interno dos sócios.</p>
+  <button class="gbtn" id="btnLogin" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>
+  <p id="loginMsg"></p>
+</div></div>
+
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="mark" aria-hidden="true"><div><span>DR</span><i></i><span>FT</span></div></div>
+      <div class="brand"><b>Draft</b><small>Publicidade e Marketing</small></div>
+      <div class="sp"></div>
+      <span class="who" id="who"></span>
+      <button class="ghost" id="btnSocios" type="button">Sócios</button>
+      <button class="ghost" id="btnSair" type="button">Sair</button>
+    </div>
+    <nav role="tablist" id="tabs">
+      <button role="tab" data-tab="geral">Visão geral</button>
+      <button role="tab" data-tab="artistas">Artistas</button>
+      <button role="tab" data-tab="marcas">Marcas</button>
+      <button role="tab" data-tab="agenda">Agenda</button>
+      <button role="tab" data-tab="eventos">Eventos</button>
+      <button role="tab" data-tab="financeiro">Financeiro</button>
+      <button role="tab" data-tab="dicas">Dicas</button>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <div id="status" class="note" hidden></div>
+  <div id="view"></div>
+</main>
+<div id="sheet" class="sheet" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+(function(){
+const COLLS=['artistas','marcas','agenda','eventos','financeiro'];
+const ST_MARCA=['A prospectar','Primeiro contato','Reunião marcada','Proposta enviada','Fechado','Perdido'];
+const ST_EVENTO=['Prospecção','Proposta enviada','Fechado','Realizado','Pago'];
+const ST_COLOR={'Prospecção':'p-mut','Proposta enviada':'p-info','Fechado':'p-acc','Realizado':'p-pos','Pago':'p-pos','Ativo':'p-pos','Em negociação':'p-acc','Pausado':'p-mut','Pendente':'p-acc','A prospectar':'p-mut','Primeiro contato':'p-info','Reunião marcada':'p-info','Perdido':'p-neg','Atrasado':'p-neg','Contrato vence':'p-neg'};
+const MARCA_C={'A prospectar':'var(--mut)','Primeiro contato':'var(--info)','Reunião marcada':'color-mix(in srgb,var(--info) 60%,var(--fg))','Proposta enviada':'var(--acc)','Fechado':'var(--pos)','Perdido':'var(--neg)'};
+const FUNNEL_C={'Prospecção':'var(--mut)','Proposta enviada':'var(--info)','Fechado':'var(--acc)','Realizado':'var(--pos)','Pago':'color-mix(in srgb,var(--pos) 55%,var(--fg))'};
+const SCHEMA={
+  artistas:{nome:'artista',f:[
+    {k:'nome',l:'Nome artístico',req:1,full:1},
+    {k:'insta',l:'Instagram',t:'insta',ph:'@usuario'},
+    {k:'segmento',l:'Nicho',ph:'Futebol, humor, pagode…'},
+    {k:'seguidores',l:'Seguidores',t:'num',ph:'Ex.: 85000'},
+    {k:'engaj',l:'Engajamento (%)',t:'num',ph:'Ex.: 4,5'},
+    {k:'views',l:'Views médias por Reels',t:'num',ph:'Ex.: 40000'},
+    {k:'cidade',l:'Cidade'},
+    {k:'reels',l:'Preço Reels (R$)',t:'money'},
+    {k:'stories',l:'Preço Stories (R$)',t:'money'},
+    {k:'cache',l:'Cachê presença (R$)',t:'money'},
+    {k:'comissao',l:'Comissão DRAFT (%)',t:'num',ph:'Ex.: 20'},
+    {k:'contato',l:'Contato',ph:'Telefone ou e-mail'},
+    {k:'exclusivo',l:'Exclusividade',t:'select',o:['Não','Sim, por segmento','Sim, total']},
+    {k:'contratoAte',l:'Contrato até',t:'date'},
+    {k:'status',l:'Status',t:'select',o:['Ativo','Em negociação','Pausado']},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {k:'obs',l:'Observações',t:'area',full:1}]},
+  marcas:{nome:'marca',f:[
+    {k:'marca',l:'Marca',req:1},
+    {k:'grupo',l:'Empresa / grupo',ph:'Ex.: Heineken Brasil'},
+    {k:'segmento',l:'Segmento',ph:'Bebidas, esporte, delivery…'},
+    {k:'insta',l:'Instagram da marca',t:'insta',ph:'@marca'},
+    {k:'status',l:'Etapa',t:'select',o:ST_MARCA},
+    {k:'potencial',l:'Potencial (R$)',t:'money'},
+    {k:'contatoNome',l:'Pessoa de contato',ph:'Nome'},
+    {k:'cargo',l:'Cargo',ph:'Brand manager, trade…'},
+    {k:'contato',l:'E-mail ou WhatsApp',full:1},
+    {k:'proximo',l:'Próximo passo',ph:'Ex.: mandar mídia kit'},
+    {k:'proximoData',l:'Até quando',t:'date'},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {k:'obs',l:'Observações',t:'area',full:1}]},
+  agenda:{nome:'compromisso',f:[
+    {k:'titulo',l:'O que é',req:1,full:1,ph:'Reunião com a marca, gravação…'},
+    {k:'data',l:'Data',t:'date',req:1},
+    {k:'hora',l:'Hora',t:'time'},
+    {k:'tipo',l:'Tipo',t:'select',o:['Reunião','Gravação','Entrega','Visita','Outro']},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {k:'artista',l:'Artista',t:'artista'},
+    {k:'local',l:'Local'},
+    {k:'obs',l:'Observações',t:'area',full:1}]},
+  eventos:{nome:'evento',f:[
+    {k:'nome',l:'Nome do evento / ação',req:1,full:1},
+    {k:'marca',l:'Marca ou cliente',t:'marcalist'},
+    {k:'data',l:'Data',t:'date'},
+    {k:'local',l:'Local'},
+    {k:'status',l:'Status',t:'select',o:ST_EVENTO},
+    {k:'valor',l:'Valor do contrato (R$)',t:'money'},
+    {k:'custo',l:'Cachês e custos (R$)',t:'money'},
+    {k:'vencimento',l:'Marca paga em',t:'date'},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {k:'artistas',l:'Artistas',t:'artistas',full:1},
+    {k:'entregas',l:'Entregas combinadas',t:'area',full:1,ph:'Ex.: 1 Reels collab + 3 Stories + presença de 2h'},
+    {k:'obs',l:'Observações',t:'area',full:1}]},
+  financeiro:{nome:'lançamento',f:[
+    {k:'desc',l:'Descrição',req:1,full:1},
+    {k:'tipo',l:'Tipo',t:'select',o:['Entrada','Saída'],req:1},
+    {k:'valor',l:'Valor (R$)',t:'money',req:1},
+    {k:'data',l:'Data',t:'date',req:1},
+    {k:'status',l:'Situação',t:'select',o:['Pago','Pendente']},
+    {k:'categoria',l:'Categoria',t:'select',o:['Contrato','Cachê artista','Produção','Transporte','Anúncios','Ferramentas','Retirada de sócio','Outro']},
+    {k:'socio',l:'Sócio',t:'socio'},
+    {k:'evento',l:'Evento ligado',t:'evento',full:1}]}
+};
+
+const S={data:{artistas:[],marcas:[],agenda:[],eventos:[],financeiro:[]},socios:['Sócio 1','Sócio 2','Sócio 3'],
+  tab:'geral',month:'',q:'',fSocio:'',fStatus:'',fTipo:'',passados:false};
+let db=null, live=false;
+
+const pad=n=>String(n).padStart(2,'0');
+const now=new Date();
+const TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+S.month=TODAY.slice(0,7);
+const brl=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const money=v=>brl.format(Number(v)||0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toDate=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const DOW=['dom','seg','ter','qua','qui','sex','sáb'], MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESF=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const dShort=s=>{if(!s)return'';const d=toDate(s);return `${DOW[d.getDay()]}, ${d.getDate()} ${MES[d.getMonth()]}`};
+const monthLabel=m=>{const[y,mm]=m.split('-').map(Number);return `${MESF[mm-1]} ${y}`};
+const shiftMonth=(m,k)=>{let[y,mm]=m.split('-').map(Number);mm+=k;while(mm<1){mm+=12;y--}while(mm>12){mm-=12;y++}return `${y}-${pad(mm)}`};
+const parseMoney=s=>{s=String(s??'').replace(/[R$\s]/g,'');if(!s)return 0;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');return Number(s)||0};
+const socioName=i=>(i===''||i==null)?'':(S.socios[Number(i)]||'');
+const artistaName=id=>(S.data.artistas.find(a=>a.id===id)||{}).nome||'';
+const pill=(t,cls)=>t?`<span class="pill ${cls||ST_COLOR[t]||'p-mut'}">${esc(t)}</span>`:'';
+const igHandle=v=>{v=String(v||'').trim();if(!v)return'';const m=v.match(/instagram\.com\/([^/?#\s]+)/i);if(m)v=m[1];return v.replace(/^@+/,'').replace(/[^A-Za-z0-9._]/g,'')};
+const igUrl=h=>`https://www.instagram.com/${h}/`;
+const igLink=v=>{const h=igHandle(v);return h?`<a class="ig" href="${igUrl(h)}" target="_blank" rel="noopener">@${esc(h)}</a>`:''};
+const compact=new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1});
+const num=v=>(+v||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
+const addDays=(s,n)=>{const d=toDate(s);d.setDate(d.getDate()+n);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const empty=(t,s)=>`<div class="empty"><b>${esc(t)}</b>${esc(s)}</div>`;
+
+/* ---------- tabs ---------- */
+const tabs=document.getElementById('tabs');
+tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(!b)return;go(b.dataset.tab)});
+function go(t){S.tab=t;S.fStatus='';try{localStorage.setItem('draft_tab',t)}catch(e){}render();window.scrollTo(0,0)}
+try{const t=localStorage.getItem('draft_tab');if(t&&document.querySelector(`[data-tab="${t}"]`))S.tab=t}catch(e){}
+if(location.hash&&document.querySelector(`[data-tab="${location.hash.slice(1)}"]`))S.tab=location.hash.slice(1);
+
+const view=document.getElementById('view');
+function render(){
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===S.tab));
+  ({geral:vGeral,artistas:vArtistas,marcas:vMarcas,agenda:vAgenda,eventos:vEventos,financeiro:vFin,dicas:vDicas})[S.tab]();
+}
+
+/* ---------- helpers de cálculo ---------- */
+function finMonth(m){
+  const L=S.data.financeiro.filter(x=>(x.data||'').startsWith(m));
+  const ent=L.filter(x=>x.tipo==='Entrada'&&x.status!=='Pendente').reduce((a,x)=>a+(+x.valor||0),0);
+  const sai=L.filter(x=>x.tipo==='Saída'&&x.status!=='Pendente'&&x.categoria!=='Retirada de sócio').reduce((a,x)=>a+(+x.valor||0),0);
+  const ret=[0,1,2].map(i=>L.filter(x=>x.categoria==='Retirada de sócio'&&String(x.socio)===String(i)&&x.status!=='Pendente').reduce((a,x)=>a+(+x.valor||0),0));
+  return {L,ent,sai,res:ent-sai,ret};
+}
+const pend=tipo=>S.data.financeiro.filter(x=>x.tipo===tipo&&x.status==='Pendente');
+const monthNav=()=>`<div class="month"><button type="button" data-m="-1" aria-label="Mês anterior">‹</button><span>${monthLabel(S.month)}</span><button type="button" data-m="1" aria-label="Próximo mês">›</button></div>`;
+function bindMonth(){view.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.month=shiftMonth(S.month,+b.dataset.m);render()})}
+function bindOpen(){view.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const[c,id]=b.dataset.open.split(':');openForm(c,id)})}
+function upcoming(){
+  const a=S.data.agenda.map(x=>({c:'agenda',id:x.id,data:x.data,hora:x.hora||'',t:x.titulo,s:[x.tipo,socioName(x.socio),artistaName(x.artista),x.local].filter(Boolean).join(' · '),tag:x.tipo||'Compromisso'}));
+  const e=S.data.eventos.filter(x=>x.data).map(x=>({c:'eventos',id:x.id,data:x.data,hora:'',t:x.nome,s:[x.marca,(x.artistas||[]).map(artistaName).filter(Boolean).join(', '),x.local].filter(Boolean).join(' · '),tag:'Evento',st:x.status}));
+  const m=S.data.marcas.filter(x=>x.proximoData&&!['Fechado','Perdido'].includes(x.status)).map(x=>({c:'marcas',id:x.id,data:x.proximoData,hora:'',t:`${x.marca}: ${x.proximo||'retomar contato'}`,s:[x.contatoNome,socioName(x.socio)].filter(Boolean).join(' · '),tag:'Follow-up'}));
+  return a.concat(e,m).sort((p,q)=>(p.data+p.hora).localeCompare(q.data+q.hora));
+}
+function dateRow(x,late){
+  const d=toDate(x.data);
+  return `<button class="row date" type="button" data-open="${x.c}:${x.id}">
+    <div class="d"><b>${d.getDate()}</b><small>${MES[d.getMonth()]} · ${DOW[d.getDay()]}</small></div>
+    <div class="t">${x.hora?`<span style="color:var(--mut);font-weight:500">${esc(x.hora)} </span>`:''}${esc(x.t)}</div>
+    <div class="s">${esc(x.s)}</div>
+    <div class="r">${late?pill('Atrasado'):x.c==='eventos'?pill(x.st||'Evento'):pill(x.tag,x.c==='marcas'?'p-info':'p-mut')}</div></button>`;
+}
+
+/* ---------- Visão geral ---------- */
+function vGeral(){
+  const f=finMonth(S.month), rec=pend('Entrada'), pag=pend('Saída');
+  const prox=upcoming().filter(x=>x.data>=TODAY).slice(0,6);
+  const atras=upcoming().filter(x=>x.c==='marcas'&&x.data<TODAY);
+  const mk=S.data.marcas, mkAbertas=mk.filter(x=>!['Fechado','Perdido'].includes(x.status));
+  const mkPot=mkAbertas.reduce((a,x)=>a+(+x.potencial||0),0);
+  const ev=S.data.eventos, tot=ev.length;
+  const cont=ST_EVENTO.map(s=>[s,ev.filter(x=>(x.status||'Prospecção')===s).length]);
+  const pipe=ev.filter(x=>['Proposta enviada','Fechado'].includes(x.status)).reduce((a,x)=>a+(+x.valor||0),0);
+  const parte=f.res/3;
+  view.innerHTML=`
+  <div class="bar"><h2>Visão geral</h2>${monthNav()}</div>
+  <div class="kpis">
+    <div class="kpi"><label>Entrou no mês</label><b class="pos">${money(f.ent)}</b><em>${f.L.filter(x=>x.tipo==='Entrada').length} lançamentos</em></div>
+    <div class="kpi"><label>Saiu no mês</label><b class="neg">${money(f.sai)}</b><em>sem retiradas</em></div>
+    <div class="kpi"><label>Resultado</label><b class="${f.res<0?'neg':''}">${money(f.res)}</b><em>entradas − saídas</em></div>
+    <div class="kpi"><label>A receber</label><b>${money(rec.reduce((a,x)=>a+(+x.valor||0),0))}</b><em>${rec.length} pendente${rec.length===1?'':'s'} · a pagar ${money(pag.reduce((a,x)=>a+(+x.valor||0),0))}</em></div>
+  </div>
+  <h3>Divisão entre sócios · ${monthLabel(S.month)}</h3>
+  <div class="split">${[0,1,2].map(i=>`<div><label>${esc(S.socios[i])}</label><b>${money(parte)}</b><em>retirou ${money(f.ret[i])} · saldo ${money(parte-f.ret[i])}</em></div>`).join('')}</div>
+  <div class="two">
+    <div>
+      ${atras.length?`<h3 class="late">Follow-ups atrasados · ${atras.length}</h3><div class="rows">${atras.slice(0,5).map(x=>dateRow(x,1)).join('')}</div>`:''}
+      <h3>Próximos compromissos</h3>
+      <div class="rows">${prox.length?prox.map(dateRow).join(''):empty('Nada marcado daqui pra frente','Cadastre na aba Agenda ou dê data a um evento.')}</div>
+    </div>
+    <div>
+      <h3>Eventos por status</h3>
+      ${tot?`<div class="funnel">${cont.filter(c=>c[1]).map(([s,n])=>`<i style="width:${n/tot*100}%;background:${FUNNEL_C[s]}" title="${esc(s)}: ${n}"></i>`).join('')}</div>
+      <div class="legend">${cont.map(([s,n])=>`<span style="--c:${FUNNEL_C[s]}">${esc(s)}</span><b>${n}</b>`).join('')}</div>
+      <p style="font-size:13px;color:var(--mut);margin-top:14px">Em negociação e fechados: <b style="color:var(--fg)">${money(pipe)}</b></p>`
+      :`<div class="rows">${empty('Nenhum evento ainda','Cadastre na aba Eventos.')}</div>`}
+      <h3>Marcas</h3>
+      ${mk.length?`<div class="funnel">${ST_MARCA.map(s=>[s,mk.filter(x=>(x.status||'A prospectar')===s).length]).filter(c=>c[1]).map(([s,n])=>`<i style="width:${n/mk.length*100}%;background:${MARCA_C[s]}" title="${esc(s)}: ${n}"></i>`).join('')}</div>
+      <div class="legend">${ST_MARCA.map(s=>`<span style="--c:${MARCA_C[s]}">${esc(s)}</span><b>${mk.filter(x=>(x.status||'A prospectar')===s).length}</b>`).join('')}</div>
+      <p style="font-size:13px;color:var(--mut);margin-top:14px">Potencial em aberto: <b style="color:var(--fg)">${money(mkPot)}</b></p>`:`<div class="rows">${empty('Nenhuma marca no funil','Cadastre na aba Marcas.')}</div>`}
+      <h3>Artistas</h3>
+      <div class="legend">${['Ativo','Em negociação','Pausado'].map(s=>`<span style="--c:var(${s==='Ativo'?'--pos':s==='Pausado'?'--mut':'--acc'})">${s}</span><b>${S.data.artistas.filter(a=>(a.status||'Ativo')===s).length}</b>`).join('')}</div>
+    </div>
+  </div>`;
+  bindMonth();bindOpen();
+}
+
+/* ---------- Artistas ---------- */
+function vArtistas(){
+  view.innerHTML=`<div class="bar"><h2>Artistas</h2><button class="add" type="button" id="novo">+ Artista</button></div>
+  <input class="search" id="qArt" type="search" placeholder="Buscar por nome, @ ou segmento" value="${esc(S.q)}">
+  <div class="chips" id="chipsArt">${['','Ativo','Em negociação','Pausado'].map(s=>`<button class="chip" type="button" data-s="${s}" aria-pressed="${S.fStatus===s}">${s||'Todos'}</button>`).join('')}</div>
+  <div class="rows" id="listArt"></div>`;
+  document.getElementById('novo').onclick=()=>openForm('artistas');
+  const q=document.getElementById('qArt');
+  q.oninput=()=>{S.q=q.value;listArt()};
+  document.getElementById('chipsArt').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.fStatus=b.dataset.s;vArtistas()};
+  listArt();
+}
+function listArt(){
+  const q=S.q.trim().toLowerCase();
+  const L=S.data.artistas.filter(a=>(!S.fStatus||(a.status||'Ativo')===S.fStatus)&&(!q||[a.nome,a.insta,a.segmento].join(' ').toLowerCase().includes(q))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  const el=document.getElementById('listArt');
+  el.innerHTML=L.length?L.map(a=>{
+    const evs=S.data.eventos.filter(e=>(e.artistas||[]).includes(a.id)).length;
+    const vence=a.contratoAte&&a.contratoAte<=addDays(TODAY,30);
+    const preco=a.reels?`${money(a.reels)} <span style="color:var(--mut);font-weight:400">Reels</span>`:a.cache?`${money(a.cache)} <span style="color:var(--mut);font-weight:400">presença</span>`:'';
+    return `<div class="row st">
+      <div class="t"><button class="open" type="button" data-open="artistas:${a.id}">${esc(a.nome)}</button> ${igLink(a.insta)}</div>
+      <div class="s">${esc([a.seguidores?compact.format(a.seguidores)+' seguidores':'',a.engaj?num(a.engaj)+'% eng.':'',a.segmento,a.cidade,socioName(a.socio)&&'resp. '+socioName(a.socio),evs?evs+' evento'+(evs>1?'s':''):''].filter(Boolean).join(' · ')||'—')}</div>
+      <div class="r">${preco?`<span class="v">${preco}</span>`:''}${vence?pill('Contrato vence'):pill(a.status||'Ativo')}</div></div>`}).join('')
+    :empty(S.data.artistas.length?'Ninguém com esse filtro':'Nenhum artista cadastrado','Toque em + Artista para adicionar o primeiro.');
+  el.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const[c,id]=b.dataset.open.split(':');openForm(c,id)});
+}
+
+/* ---------- Marcas ---------- */
+function vMarcas(){
+  const L=S.data.marcas.filter(m=>!S.fStatus||(m.status||'A prospectar')===S.fStatus)
+    .sort((a,b)=>(a.proximoData||'9999').localeCompare(b.proximoData||'9999')||(a.marca||'').localeCompare(b.marca||''));
+  const ab=L.filter(x=>!['Fechado','Perdido'].includes(x.status));
+  view.innerHTML=`<div class="bar"><h2>Marcas</h2><button class="add" type="button" id="novo">+ Marca</button></div>
+  <div class="chips" id="chipsMk">${['',...ST_MARCA].map(s=>`<button class="chip" type="button" data-s="${s}" aria-pressed="${S.fStatus===s}">${s||'Todas'}</button>`).join('')}</div>
+  ${L.length?`<p style="font-size:13px;color:var(--mut);margin:0 0 10px">${L.length} marca${L.length>1?'s':''} · ${ab.length} em aberto · potencial ${money(ab.reduce((a,x)=>a+(+x.potencial||0),0))}</p>`:''}
+  <div class="rows">${L.length?L.map(m=>{const late=m.proximoData&&m.proximoData<TODAY&&!['Fechado','Perdido'].includes(m.status);
+    const prox=m.proximo||m.proximoData?`<span class="${late?'late':''}">Próximo: ${esc(m.proximo||'retomar contato')}${m.proximoData?' · '+esc(dShort(m.proximoData)):''}</span>`:'';
+    return `<div class="row st">
+    <div class="t"><button class="open" type="button" data-open="marcas:${m.id}">${esc(m.marca)}</button> ${igLink(m.insta)}</div>
+    <div class="s">${esc([m.grupo,m.segmento,[m.contatoNome,m.cargo].filter(Boolean).join(', ')].filter(Boolean).join(' · '))}${prox?'<br>'+prox:''}</div>
+    <div class="r">${m.potencial?`<span class="v">${money(m.potencial)}</span>`:''}${pill(m.status||'A prospectar')}</div></div>`}).join('')
+    :empty('Nenhuma marca nessa etapa','Cadastre a marca, quem é o contato e qual o próximo passo.')}</div>`;
+  document.getElementById('novo').onclick=()=>openForm('marcas');
+  document.getElementById('chipsMk').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.fStatus=b.dataset.s;vMarcas()};
+  bindOpen();
+}
+
+/* ---------- Dicas ---------- */
+const DICAS=[
+ {h:'Captar marcas',p:'O que mais funciona para uma agência pequena entrar em marca grande.',l:[
+  ['Comece por quem já aparece no conteúdo','Se a Amstel já aparece nos Reels dos seus artistas, esse vídeo e as views dele viram o primeiro case. Mostre para a marca o alcance que ela teve sem pagar nada.'],
+  ['Fale com quem compra, não com o SAC','Em Heineken, Ambev ou Coca-Cola quem decide é o marketing de marca, o trade marketing regional ou a agência de influência que atende a conta. No LinkedIn, busque "brand manager", "trade marketing Rio" ou "influência" junto com o nome da marca.'],
+  ['Venda também para as agências das marcas','Muitas marcas grandes contratam criadores por meio de agências e plataformas de influência. Se apresentar como fornecedor de talentos para elas é um atalho para campanhas grandes.'],
+  ['Leve a proposta pronta','Em vez de perguntar se a marca tem interesse, mande algo como: 3 criadores de futebol carioca, 85 mil seguidores somados, 5% de engajamento, 1 Reels collab + Stories ao vivo em dia de jogo, por R$ X.'],
+  ['Use o calendário das marcas','Campanhas são planejadas por data: Carnaval, Copa, Dia dos Pais, Black Friday, verão. Aborde de 60 a 90 dias antes.'],
+  ['Feche primeiro com marcas locais','Bares, hamburguerias, casas de show e distribuidoras fecham mais rápido e geram os números que abrem porta nas grandes.'],
+  ['Follow-up com data marcada','Quase ninguém responde ao primeiro contato. Faça 3 contatos em 2 semanas, cada um trazendo algo novo (um número, um vídeo, uma data), e registre o próximo passo na aba Marcas.']]},
+ {h:'Captar artistas',p:'Quem entra no casting define o que a DRAFT consegue vender.',l:[
+  ['Engajamento vale mais que seguidores','Um perfil de 30 mil com 6% de engajamento costuma vender melhor que um de 300 mil com 0,5%. Conta: média de (curtidas + comentários) dos últimos 10 posts ÷ seguidores × 100.'],
+  ['Escolha nichos que as marcas compram','Futebol, humor carioca, pagode, funk, gastronomia, vida noturna. A marca compra o público do artista.'],
+  ['Confira se a audiência é real','Comentários de gente de verdade, views dos Reels compatíveis com o número de seguidores e crescimento sem saltos estranhos.'],
+  ['Ofereça o que o artista não tem','Negociação, contrato, cobrança, roteiro e edição. É isso que justifica a comissão.'],
+  ['Contrato simples desde o primeiro dia','Comissão (agências costumam ficar entre 20% e 30%), prazo, exclusividade por segmento (não fechar com outra cerveja, por exemplo) e quem recebe da marca e em quantos dias repassa.'],
+  ['Procure onde eles já estão','Eventos, rodas de samba, torcidas e indicações dos artistas que você já tem.']]},
+ {h:'Mídia kit',p:'O PDF de uma página que vai em todo primeiro contato.',l:[
+  ['Quem é e qual o nicho','Uma linha, com foto boa.'],
+  ['Números','Seguidores, views médias dos Reels e engajamento. Atualize todo mês.'],
+  ['Público','Idade, cidade e gênero, tirados do Instagram Insights do artista.'],
+  ['Cases','Dois ou três trabalhos com resultado: views, comentários, cupons usados.'],
+  ['Formatos e preços','Reels, Stories, presença em evento e pacote. Deixe um pacote como opção mais vantajosa.']]},
+ {h:'Precificação',p:'Um jeito usado no mercado é cobrar por mil visualizações (CPM) e ajustar pelo nicho e pela exclusividade.',l:[
+  ['Exemplo','Reels com média de 40 mil views × R$ 30 a R$ 60 por mil = de R$ 1.200 a R$ 2.400.'],
+  ['Pacote','Reels + 3 Stories costuma sair 15% a 25% mais barato que somar as peças separadas, e fecha mais fácil.'],
+  ['Exclusividade e uso de imagem','Cobre à parte. Se a marca quer usar o vídeo em anúncio pago ou impedir o artista de trabalhar com concorrente, isso tem preço.']]}
+];
+const REFS=[
+ ['Mynd e Play9','Juntam gestão de talentos e venda para marcas no mesmo lugar, o mesmo modelo da DRAFT. Vale copiar: casting organizado por nicho, mídia kit sempre atualizado e um responsável por cada marca.'],
+ ['Heineken e Ambev','Planejam verba por ano e por data. O que entra fora do plano costuma vir de trade marketing regional e ativações em eventos.'],
+ ['Relatório pós-campanha','Agências grandes mandam números até 7 dias depois da entrega: views, alcance, comentários, prints. É o que faz a marca renovar.'],
+ ['Um dono por conta','Cada marca tem um sócio responsável. Use o campo Sócio responsável nas abas Marcas e Eventos.']
+];
+function vDicas(){
+  view.innerHTML=`<div class="bar"><h2>Dicas</h2></div><div class="tips">
+  ${DICAS.map(d=>`<section class="tip"><h3>${esc(d.h)}</h3><p>${esc(d.p)}</p><ul>${d.l.map(([b,t])=>`<li><b>${esc(b)}</b><span>${esc(t)}</span></li>`).join('')}</ul></section>`).join('')}
+  <section class="tip"><h3>Como as grandes fazem</h3><div class="ref">${REFS.map(([b,t])=>`<div><b>${esc(b)}</b><small>${esc(t)}</small></div>`).join('')}</div></section>
+  </div>`;
+}
+
+/* ---------- Agenda ---------- */
+function vAgenda(){
+  let L=upcoming().filter(x=>S.passados?x.data<TODAY:x.data>=TODAY);
+  if(S.fSocio!==''){L=L.filter(x=>{const src=S.data[x.c].find(y=>y.id===x.id);return String(src?.socio)===S.fSocio})}
+  if(S.passados)L.reverse();
+  view.innerHTML=`<div class="bar"><h2>Agenda</h2><button class="add" type="button" id="novo">+ Compromisso</button></div>
+  <div class="chips" id="chipsAg">
+    <button class="chip" type="button" data-p="0" aria-pressed="${!S.passados}">Próximos</button>
+    <button class="chip" type="button" data-p="1" aria-pressed="${S.passados}">Anteriores</button>
+    <span style="width:8px"></span>
+    ${['',0,1,2].map(i=>`<button class="chip" type="button" data-so="${i}" aria-pressed="${S.fSocio===String(i)}">${i===''?'Todos':esc(S.socios[i])}</button>`).join('')}
+  </div>
+  <div class="rows">${L.length?L.map(dateRow).join(''):empty(S.passados?'Sem compromissos anteriores':'Agenda livre','Eventos com data aparecem aqui junto com os compromissos.')}</div>`;
+  document.getElementById('novo').onclick=()=>openForm('agenda');
+  document.getElementById('chipsAg').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.p!=null)S.passados=b.dataset.p==='1';if(b.dataset.so!=null)S.fSocio=b.dataset.so;vAgenda()};
+  bindOpen();
+}
+
+/* ---------- Eventos ---------- */
+function vEventos(){
+  const L=S.data.eventos.filter(e=>!S.fStatus||!ST_EVENTO.includes(S.fStatus)||(e.status||'Prospecção')===S.fStatus)
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  const tv=L.reduce((a,e)=>a+(+e.valor||0),0), tc=L.reduce((a,e)=>a+(+e.custo||0),0);
+  view.innerHTML=`<div class="bar"><h2>Eventos</h2><button class="add" type="button" id="novo">+ Evento</button></div>
+  <div class="chips" id="chipsEv">${['',...ST_EVENTO].map(s=>`<button class="chip" type="button" data-s="${s}" aria-pressed="${(ST_EVENTO.includes(S.fStatus)?S.fStatus:'')===s}">${s||'Todos'}</button>`).join('')}</div>
+  ${L.length?`<p style="font-size:13px;color:var(--mut);margin:0 0 10px">${L.length} evento${L.length>1?'s':''} · contratos ${money(tv)} · custos ${money(tc)} · margem <b style="color:var(--fg)">${money(tv-tc)}</b></p>`:''}
+  <div class="rows">${L.length?L.map(e=>{const m=(+e.valor||0)-(+e.custo||0);return `<button class="row" type="button" data-open="eventos:${e.id}">
+    <div class="t">${esc(e.nome)}</div>
+    <div class="s">${esc([e.marca,dShort(e.data),(e.artistas||[]).map(artistaName).filter(Boolean).join(', ')].filter(Boolean).join(' · ')||'—')}</div>
+    <div class="r">${e.valor?`<span class="v">${money(e.valor)}</span><span style="font-size:12px" class="${m<0?'neg':'p-mut'}">margem ${money(m)}</span>`:''}${pill(e.status||'Prospecção')}</div></button>`}).join('')
+    :empty('Nenhum evento nesse filtro','Cadastre a ação, a marca e os artistas envolvidos.')}</div>`;
+  document.getElementById('novo').onclick=()=>openForm('eventos');
+  document.getElementById('chipsEv').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.fStatus=b.dataset.s;vEventos()};
+  bindOpen();
+}
+
+/* ---------- Financeiro ---------- */
+function vFin(){
+  const f=finMonth(S.month);
+  let L=f.L.slice().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  if(S.fTipo)L=L.filter(x=>x.tipo===S.fTipo);
+  view.innerHTML=`<div class="bar"><h2>Financeiro</h2>${monthNav()}<button class="add" type="button" id="novo">+ Lançamento</button></div>
+  <div class="kpis">
+    <div class="kpi"><label>Entradas</label><b class="pos">${money(f.ent)}</b></div>
+    <div class="kpi"><label>Saídas</label><b class="neg">${money(f.sai)}</b></div>
+    <div class="kpi"><label>Retiradas</label><b>${money(f.ret.reduce((a,b)=>a+b,0))}</b></div>
+    <div class="kpi"><label>Resultado</label><b class="${f.res<0?'neg':''}">${money(f.res)}</b></div>
+  </div>
+  <h3>Últimos 6 meses</h3>
+  <div class="chart">${chart()}</div>
+  <div class="key"><span style="--c:var(--pos)">Entradas</span><span style="--c:var(--neg)">Saídas</span><span style="--c:var(--fg)">Resultado</span></div>
+  <h3>Lançamentos de ${monthLabel(S.month)}</h3>
+  <div class="chips" id="chipsFin">${['','Entrada','Saída'].map(t=>`<button class="chip" type="button" data-t="${t}" aria-pressed="${S.fTipo===t}">${t?t+'s':'Todos'}</button>`).join('')}</div>
+  <div class="rows">${L.length?L.map(x=>`<button class="row" type="button" data-open="financeiro:${x.id}">
+    <div class="t">${esc(x.desc)}</div>
+    <div class="s">${esc([dShort(x.data),x.categoria,socioName(x.socio)].filter(Boolean).join(' · '))}</div>
+    <div class="r"><span class="v ${x.tipo==='Entrada'?'pos':'neg'}">${x.tipo==='Entrada'?'+':'−'} ${money(x.valor)}</span>${x.status==='Pendente'?pill('Pendente'):''}</div></button>`).join('')
+    :empty('Nenhum lançamento neste mês','Registre contratos recebidos, cachês pagos e despesas.')}</div>`;
+  document.getElementById('novo').onclick=()=>openForm('financeiro');
+  document.getElementById('chipsFin').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.fTipo=b.dataset.t;vFin()};
+  bindMonth();bindOpen();
+}
+function chart(){
+  const ms=[5,4,3,2,1,0].map(k=>shiftMonth(S.month,-k)), d=ms.map(m=>finMonth(m));
+  const max=Math.max(1,...d.map(x=>Math.max(x.ent,x.sai)));
+  const nice=(()=>{const p=Math.pow(10,Math.floor(Math.log10(max)));const s=[1,2,2.5,5,10].find(s=>s*p>=max);return s*p})();
+  const W=600,H=190,L=56,B=26,T=10,ch=H-B-T,cw=(W-L-8)/6,bw=Math.min(22,cw/3.2);
+  const y=v=>T+ch-(v/nice)*ch, kfmt=v=>v>=1000?(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil':String(v);
+  let g='';
+  [0,.5,1].forEach(r=>{const v=nice*r;g+=`<line x1="${L}" x2="${W-8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${kfmt(v)}</text>`});
+  const pts=[];
+  d.forEach((x,i)=>{const cx=L+cw*i+cw/2;
+    g+=`<rect x="${cx-bw-1}" y="${y(x.ent)}" width="${bw}" height="${Math.max(0,ch+T-y(x.ent))}" fill="var(--pos)" rx="1"><title>Entradas ${money(x.ent)}</title></rect>`;
+    g+=`<rect x="${cx+1}" y="${y(x.sai)}" width="${bw}" height="${Math.max(0,ch+T-y(x.sai))}" fill="var(--neg)" rx="1"><title>Saídas ${money(x.sai)}</title></rect>`;
+    const [yy,mm]=ms[i].split('-').map(Number);
+    g+=`<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="12" fill="${i===5?'var(--fg)':'var(--mut)'}" font-weight="${i===5?600:400}">${MES[mm-1]}</text>`;
+    pts.push([cx,y(Math.max(0,x.res))]);});
+  g+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--fg)" stroke-width="1.5"/>`;
+  g+=pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===5?4:2.5}" fill="var(--fg)"><title>Resultado ${money(d[i].res)}</title></circle>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Entradas e saídas dos últimos 6 meses">${g}</svg>`;
+}
+
+/* ---------- Formulário ---------- */
+const sheet=document.getElementById('sheet');
+function field(f,v){
+  const id='f_'+f.k, cls=f.full?' class="full"':'', req=f.req?' required':'';
+  let inp;
+  if(f.t==='select')inp=`<select id="${id}" name="${f.k}"${req}>${f.req?'':'<option value=""></option>'}${f.o.map(o=>`<option${o===v?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(f.t==='socio')inp=`<select id="${id}" name="${f.k}"><option value=""></option>${S.socios.map((s,i)=>`<option value="${i}"${String(v)===String(i)?' selected':''}>${esc(s)}</option>`).join('')}</select>`;
+  else if(f.t==='artista')inp=`<select id="${id}" name="${f.k}"><option value=""></option>${S.data.artistas.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')).map(a=>`<option value="${a.id}"${v===a.id?' selected':''}>${esc(a.nome)}</option>`).join('')}</select>`;
+  else if(f.t==='evento')inp=`<select id="${id}" name="${f.k}"><option value=""></option>${S.data.eventos.slice().sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(e=>`<option value="${e.id}"${v===e.id?' selected':''}>${esc(e.nome)}${e.marca?' — '+esc(e.marca):''}</option>`).join('')}</select>`;
+  else if(f.t==='artistas'){const sel=v||[];inp=S.data.artistas.length?`<div class="checks">${S.data.artistas.map(a=>`<label><input type="checkbox" name="artistas" value="${a.id}"${sel.includes(a.id)?' checked':''}>${esc(a.nome)}</label>`).join('')}</div>`:`<span style="font-size:13px">Cadastre artistas primeiro.</span>`;return `<div${cls}><label style="margin-bottom:6px">${esc(f.l)}</label>${inp}</div>`}
+  else if(f.t==='insta'){const h=igHandle(v);inp=`<input id="${id}" name="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" autocapitalize="off" autocomplete="off">${h?`<a class="iglink" href="${igUrl(h)}" target="_blank" rel="noopener">Abrir @${esc(h)} no Instagram ↗</a>`:''}`}
+  else if(f.t==='marcalist')inp=`<input id="${id}" name="${f.k}" list="dl_marcas" value="${esc(v)}" autocomplete="off"><datalist id="dl_marcas">${S.data.marcas.map(m=>`<option value="${esc(m.marca)}"></option>`).join('')}</datalist>`;
+  else if(f.t==='num')inp=`<input id="${id}" name="${f.k}" inputmode="decimal" placeholder="${esc(f.ph||'')}" value="${v?esc(String(v).replace('.',',')):''}">`;
+  else if(f.t==='area')inp=`<textarea id="${id}" name="${f.k}">${esc(v)}</textarea>`;
+  else if(f.t==='money')inp=`<input id="${id}" name="${f.k}" inputmode="decimal" placeholder="0,00" value="${v?esc(String(v).replace('.',',')):''}"${req}>`;
+  else inp=`<input id="${id}" name="${f.k}" type="${f.t||'text'}" value="${esc(v)}" placeholder="${esc(f.ph||'')}"${req}>`;
+  if(f.t==='area'&&f.ph)inp=inp.replace('<textarea ','<textarea placeholder="'+esc(f.ph)+'" ');
+  return `<label${cls}>${esc(f.l)}${inp}</label>`;
+}
+function openForm(coll,id){
+  const sc=SCHEMA[coll], cur=id?S.data[coll].find(x=>x.id===id):null;
+  const defs={data:coll==='financeiro'||coll==='agenda'?TODAY:'',status:coll==='financeiro'?'Pago':coll==='eventos'?'Prospecção':coll==='artistas'?'Ativo':coll==='marcas'?'A prospectar':'',tipo:coll==='financeiro'?'Entrada':''};
+  const val=k=>cur?cur[k]:defs[k];
+  let docId=id||null, timer=null, busy=Promise.resolve();
+  sheet.innerHTML=`<form id="frm" novalidate><h2>${cur?'Editar':'Novo'} ${sc.nome}</h2><div class="f">${sc.f.map(f=>field(f,val(f.k))).join('')}</div>
+    <div class="err" id="err" hidden></div>
+    ${coll==='eventos'&&cur?(()=>{const n=S.data.financeiro.filter(x=>x.evento===id).length;return `<div class="actions"><button type="button" class="cancel" id="lancar"${n?' disabled':''}>${n?'Já lançado no financeiro ('+n+')':'Lançar no financeiro'}</button><span class="hint">${n?'':'Cria a entrada do contrato e a saída dos cachês como pendentes.'}</span></div>`})():''}
+    <div class="actions">${cur?'<button type="button" class="del" id="del">Excluir</button>':''}<span class="sp"></span><span class="hint" id="ind">${cur?'Também salva sozinho':'Também salva sozinho ao preencher'}</span><button class="add" type="submit">Salvar</button></div></form>`;
+  sheet.hidden=false;
+  const frm=document.getElementById('frm'), ind=document.getElementById('ind'), err=document.getElementById('err');
+  setTimeout(()=>{const first=frm.querySelector('input,select');if(first&&!cur)first.focus()},30);
+  function collect(){
+    const o={};sc.f.forEach(f=>{
+      if(f.t==='artistas'){o.artistas=[...frm.querySelectorAll('input[name="artistas"]:checked')].map(c=>c.value);return}
+      const el=frm.elements[f.k];if(!el)return;let v=el.value.trim();
+      if(f.t==='money'||f.t==='num')v=parseMoney(v);
+      if(f.t==='insta'&&v)v='@'+igHandle(v);
+      o[f.k]=v;});
+    return {o,miss:sc.f.filter(f=>f.req&&!o[f.k]).map(f=>f.l)};
+  }
+  async function autosave(){
+    timer=null;const {o,miss}=collect();
+    if(miss.length){ind.textContent='Falta: '+miss.join(', ');return}
+    if(!docId)docId=newId(coll);
+    ind.textContent='Salvando…';
+    try{await save(coll,docId,o);ind.textContent=navigator.onLine?'Salvo':'Salvo no aparelho, envia quando voltar a internet';err.hidden=true}
+    catch(x){err.hidden=false;err.textContent=x&&x.code==='quota_exceeded'?'Limite de registros atingido. Exclua itens antigos.':'Não foi possível salvar este campo. Confira o que foi digitado.'}
+  }
+  const sched=()=>{clearTimeout(timer);ind.textContent='Editando…';timer=setTimeout(()=>{busy=busy.then(autosave)},600)};
+  frm.addEventListener('input',sched);frm.addEventListener('change',sched);
+  closer=async()=>{if(timer){clearTimeout(timer);busy=busy.then(autosave)}await busy;close()};
+  frm.onsubmit=async e=>{e.preventDefault();clearTimeout(timer);timer=null;await busy;
+    const {miss}=collect();
+    if(miss.length){err.hidden=false;err.textContent='Preencha: '+miss.join(', ');return}
+    await autosave();if(err.hidden)close()};
+  const del=document.getElementById('del');
+  if(del)del.onclick=async()=>{if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='Confirmar exclusão';return}
+    clearTimeout(timer);timer=null;await busy;await remove(coll,docId);close()};
+  const lan=document.getElementById('lancar');
+  if(lan&&!lan.disabled)lan.onclick=async()=>{
+    if(timer){clearTimeout(timer);busy=busy.then(autosave)}await busy;
+    const c=S.data.eventos.find(x=>x.id===docId)||cur;
+    if(!c.valor&&!c.custo){err.hidden=false;err.textContent='Preencha o valor do contrato ou os custos antes de lançar.';return}
+    lan.disabled=true;lan.textContent='Lançando…';
+    try{
+      if(c.valor)await save('financeiro',newId('financeiro'),{desc:'Contrato: '+c.nome+(c.marca?' ('+c.marca+')':''),tipo:'Entrada',valor:c.valor,data:c.vencimento||c.data||TODAY,status:'Pendente',categoria:'Contrato',socio:c.socio||'',evento:docId});
+      if(c.custo)await save('financeiro',newId('financeiro'),{desc:'Cachês: '+c.nome,tipo:'Saída',valor:c.custo,data:c.data||c.vencimento||TODAY,status:'Pendente',categoria:'Cachê artista',socio:c.socio||'',evento:docId});
+      close();
+    }catch(x){err.hidden=false;err.textContent='Não foi possível lançar. Tente de novo.';lan.disabled=false;lan.textContent='Lançar no financeiro'}};
+}
+let closer=null;
+function close(){closer=null;sheet.hidden=true;sheet.innerHTML='';render()}
+const tryClose=()=>closer?closer():close();
+sheet.addEventListener('click',e=>{if(e.target===sheet)tryClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheet.hidden)tryClose()});
+
+document.getElementById('btnSocios').onclick=()=>{
+  sheet.innerHTML=`<form id="frm"><h2>Sócios</h2><div class="f">${[0,1,2].map(i=>`<label class="full">Sócio ${i+1}<input id="soc${i}" value="${esc(S.socios[i])}"></label>`).join('')}</div>
+  <p style="font-size:13px;color:var(--mut)">O resultado do mês é dividido em partes iguais entre os três.</p>
+  <div class="actions"><span class="sp"></span><span class="hint" id="ind">Também salva sozinho</span><button class="add" type="submit">Salvar</button></div></form>`;
+  sheet.hidden=false;
+  const frm=document.getElementById('frm'),ind=document.getElementById('ind');let t=null;
+  const go=async()=>{t=null;const n=[0,1,2].map(i=>document.getElementById('soc'+i).value.trim()||`Sócio ${i+1}`);
+    S.socios=n;cacheWrite();await put('config','socios',{nomes:n});ind.textContent='Salvo'};
+  frm.oninput=()=>{clearTimeout(t);ind.textContent='Editando…';t=setTimeout(go,600)};
+  closer=async()=>{if(t){clearTimeout(t);await go()}close()};
+  frm.onsubmit=e=>{e.preventDefault();closer()};
+};
+
+/* ---------- dados: Firebase (sincroniza entre os sócios e guarda cópia offline no aparelho) ---------- */
+const firebaseConfig={
+  apiKey:"AIzaSyDH6gQLmODkRyFUntH0H-jvcSSrPyRWSMI",
+  authDomain:"draft-painel.firebaseapp.com",
+  projectId:"draft-painel",
+  storageBucket:"draft-painel.firebasestorage.app",
+  messagingSenderId:"887691908039",
+  appId:"1:887691908039:web:001190b7658d3f2932bfe2"
+};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+db=firebase.firestore();
+db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+function cacheWrite(){}
+const newId=c=>db.collection(c).doc().id;
+function applyLocal(op){
+  if(!S.data[op.c])return;
+  if(op.op==='del')S.data[op.c]=S.data[op.c].filter(x=>x.id!==op.id);
+  else{const i=S.data[op.c].findIndex(x=>x.id===op.id);const row={id:op.id,...op.body};if(i<0)S.data[op.c].push(row);else S.data[op.c][i]=row}
+}
+const wait=p=>Promise.race([p,new Promise(r=>setTimeout(r,navigator.onLine?5000:30))]);
+function denied(x){if(x&&x.code==='permission-denied'){showStatus('Seu e-mail não tem permissão para salvar. Peça para liberar nas regras do Firebase.')}}
+async function put(c,id,body){const p=db.collection(c).doc(id).set(body);p.catch(denied);await wait(p)}
+async function save(coll,id,o){
+  const prev=S.data[coll].find(x=>x.id===id);
+  const {id:_,...rest}=prev||{};
+  const body={...rest,...o};
+  if(prev)body.atualizadoEm=new Date().toISOString();else body.criadoEm=new Date().toISOString();
+  applyLocal({op:'set',c:coll,id,body});
+  await put(coll,id,body);
+}
+async function remove(coll,id){
+  if(!id)return;applyLocal({op:'del',c:coll,id});
+  const p=db.collection(coll).doc(id).delete();p.catch(denied);await wait(p);
+}
+const status=document.getElementById('status');
+let pending=false, forced='';
+function showStatus(msg){
+  if(msg!==undefined)forced=msg;
+  let m=forced;
+  if(!m&&!navigator.onLine)m='Sem internet. Tudo que você salvar fica no aparelho e sincroniza sozinho quando a conexão voltar.';
+  else if(!m&&pending)m='Enviando alterações…';
+  status.hidden=!m;status.textContent=m;
+}
+window.addEventListener('online',()=>showStatus());
+window.addEventListener('offline',()=>showStatus());
+
+/* ---------- login ---------- */
+const loginEl=document.getElementById('login'), loginMsg=document.getElementById('loginMsg');
+const prov=new firebase.auth.GoogleAuthProvider();
+prov.setCustomParameters({prompt:'select_account'});
+document.getElementById('btnLogin').onclick=async()=>{
+  loginMsg.textContent='';
+  try{await auth.signInWithPopup(prov)}
+  catch(e){
+    if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request','auth/web-storage-unsupported'].includes(e.code)){try{await auth.signInWithRedirect(prov)}catch(x){loginMsg.textContent='Não foi possível entrar: '+x.code}}
+    else if(e.code==='auth/unauthorized-domain')loginMsg.textContent='Este endereço ainda não foi liberado no Firebase. Adicione o domínio em Authentication → Configurações → Domínios autorizados.';
+    else if(e.code!=='auth/popup-closed-by-user')loginMsg.textContent='Não foi possível entrar ('+e.code+'). Tente de novo.';
+  }
+};
+auth.getRedirectResult().catch(e=>{if(e&&e.code)loginMsg.textContent='Não foi possível entrar ('+e.code+').'});
+document.getElementById('btnSair').onclick=()=>auth.signOut();
+
+let unsubs=[];
+const SEED=[
+ ['amstel','Amstel','Heineken Brasil','Cerveja','Já aparece nos Reels dos artistas. Usar esses vídeos e views como primeiro case.'],
+ ['heineken','Heineken','Heineken Brasil','Cerveja','Entrar via trade marketing regional (Rio) com ativação em evento.'],
+ ['brahma','Brahma','Ambev','Cerveja','Forte em futebol e pagode. Propor conteúdo em dia de jogo.'],
+ ['spaten','Spaten','Ambev','Cerveja','Público jovem de festa e evento.'],
+ ['coca-cola','Coca-Cola','Coca-Cola Brasil','Bebidas','Abordar pelas datas grandes (Copa, fim de ano).'],
+ ['red-bull','Red Bull','Red Bull','Energético','Trabalha muito com eventos e criadores de nicho.'],
+ ['ifood','iFood','iFood','Delivery','Humor e dia de jogo, com cupom para medir resultado.'],
+ ['mercado-livre','Mercado Livre','Mercado Livre','Varejo','Black Friday e datas de compra.'],
+ ['nike','Nike','Nike','Esporte','Criadores de futebol com audiência jovem.'],
+ ['natura','Natura','Natura','Beleza','Dia dos Pais e Dia das Mães.']];
+async function seedOnce(){
+  try{
+    const flag=await db.doc('config/seed').get({source:'server'});
+    if(flag.exists)return;
+    const any=await db.collection('marcas').limit(1).get({source:'server'});
+    const b=db.batch();
+    if(any.empty)SEED.forEach(([id,marca,grupo,segmento,obs])=>b.set(db.collection('marcas').doc(id),{marca,grupo,segmento,status:'A prospectar',obs:'Sugestão: '+obs,criadoEm:new Date().toISOString()}));
+    b.set(db.doc('config/seed'),{em:new Date().toISOString()});
+    await b.commit();
+  }catch(e){}
+}
+function start(){
+  unsubs.forEach(u=>u());unsubs=[];
+  COLLS.forEach(c=>unsubs.push(db.collection(c).onSnapshot({includeMetadataChanges:true},snap=>{
+    S.data[c]=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const p=snap.metadata.hasPendingWrites;if(p!==pending){pending=p;showStatus()}
+    if(sheet.hidden)render();
+  },e=>{if(e.code==='permission-denied')showStatus('Seu e-mail ('+(auth.currentUser&&auth.currentUser.email)+') não está liberado neste painel. Peça a um sócio para adicionar nas regras do Firebase.');else showStatus('A conexão com os dados caiu. Recarregue a página.')})));
+  unsubs.push(db.doc('config/socios').onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().nomes)){S.socios=s.data().nomes.slice(0,3);if(sheet.hidden)render()}},()=>{}));
+  seedOnce();
+}
+auth.onAuthStateChanged(u=>{
+  document.getElementById('who').textContent=u?u.email:'';
+  if(!u){unsubs.forEach(f=>f());unsubs=[];COLLS.forEach(c=>S.data[c]=[]);loginEl.hidden=false;render();return}
+  loginEl.hidden=true;forced='';showStatus();start();
+});
+render();showStatus();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>
