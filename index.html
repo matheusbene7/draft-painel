@@ -485,9 +485,18 @@ button.mail:hover{background:var(--p2)}
 .mu-bar b{font:900 16px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase}
 .mu-bar .sp{flex:1}
 .mu-body iframe{display:block;width:100%;height:80px;border:0;border-radius:12px}
-.mu-pick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.mu-pick input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--ln2);padding:9px 10px}
-.mu-pick .hint{flex-basis:100%}
+.mu-now{font:800 15px/1 var(--disp);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;margin-left:4px}
+.mu-pick{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;padding:12px;background:var(--bg);border:1px solid var(--ln)}
+.mu-pick .mrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mu-pick input[type=text],.mu-pick input:not([type]){flex:1;min-width:200px;background:var(--p);border:1px solid var(--ln2);padding:9px 10px}
+.mu-pick small{font:800 12px/1 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.mu-fav{display:flex;gap:6px;flex-wrap:wrap}
+.mu-fav button{background:var(--p);border:1px solid var(--ln2);padding:7px 10px;font:700 14px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;color:var(--fg);display:flex;gap:6px;align-items:center}
+.mu-fav button.on{border-color:var(--gold);color:var(--gold)}
+.mu-fav button em{font:500 11px var(--num);font-style:normal;color:var(--mut)}
+.mu-fav .x{padding:7px 8px;color:var(--mut)}
+.mu-pick label{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut)}
+.mu-pick a{color:var(--gold);font-size:13px}
 .music.min .mu-body{height:0;overflow:hidden}
 .music.min .mu-in{padding-block:6px}
 .music.min .mu-bar{margin-bottom:0}
@@ -548,8 +557,9 @@ body.has-music .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 <div id="sheet" class="sheet" hidden></div>
 <div id="music" class="music" hidden>
   <div class="wrap mu-in">
-    <div class="mu-bar"><b>♫ Música</b><span class="sp"></span><button class="hb" id="muTrocar" type="button">Trocar</button><button class="hb" id="muMin" type="button">Minimizar</button><button class="hb" id="muClose" type="button" aria-label="Fechar música">Fechar</button></div>
-    <div class="mu-body" id="muBody"></div>
+    <div class="mu-bar"><b>♫</b><span class="mu-now" id="muNow">Música</span><span class="sp"></span><button class="hb" id="muTrocar" type="button">Trocar</button><button class="hb" id="muMin" type="button">Minimizar</button><button class="hb" id="muClose" type="button" aria-label="Fechar música">Fechar</button></div>
+    <div class="mu-pick" id="muPick" hidden></div>
+    <div class="mu-body" id="muBody"><div id="muEmbed"></div></div>
   </div>
 </div>
 <div id="fx" class="fx" hidden></div>
@@ -1570,30 +1580,69 @@ async function igAuto(){
 }
 
 /* ---------- música (Spotify) ---------- */
-const music=$('#music'),muBody=$('#muBody');
-function spEmbed(v){
-  v=String(v||'').trim();let m=v.match(/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(?:embed\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]+)/)||v.match(/^spotify:(playlist|album|track|artist|show|episode):([A-Za-z0-9]+)$/);
-  return m?`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`:'';
-}
+const PLAYLIST_DRAFT='https://open.spotify.com/playlist/37i9dQZF1DZ06evO4n3RKO';
+const music=$('#music'),muPickEl=$('#muPick'),muNow=$('#muNow');
+let SPAPI=null,SPC=null,muCur='',muStarted=false,muWant=false,MU={padrao:'',favoritos:[]};
 const LSg=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, LSs=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+const TIPO={playlist:'Playlist',album:'Álbum',track:'Música',artist:'Artista',show:'Podcast',episode:'Episódio'};
+function spParse(v){
+  v=String(v||'').trim();
+  const m=v.match(/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(?:embed\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]+)/)||v.match(/^spotify:(playlist|album|track|artist|show|episode):([A-Za-z0-9]+)$/);
+  return m?{tipo:m[1],id:m[2],uri:`spotify:${m[1]}:${m[2]}`,link:`https://open.spotify.com/${m[1]}/${m[2]}`,src:`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`}:null;
+}
+const muPadrao=()=>MU.padrao||PLAYLIST_DRAFT;
+const muAuto=()=>LSg('draft_mu_auto')!=='0';
+async function spNome(link){
+  const fav=(MU.favoritos||[]).find(f=>spParse(f.link)?.uri===spParse(link)?.uri);if(fav)return fav.nome;
+  if(spParse(link)?.uri===spParse(muPadrao())?.uri&&!MU.padraoNome)return 'Playlist da DRAFT';
+  try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(spParse(link).link));if(r.ok){const j=await r.json();if(j.title)return j.title}}catch(e){}
+  return (spParse(link)?.uri===spParse(muPadrao())?.uri&&MU.padraoNome)||TIPO[spParse(link)?.tipo]||'Música';
+}
+function muLoad(link,play){
+  const p=spParse(link);if(!p)return false;
+  muCur=p.link;LSs('draft_mu_atual',p.link);
+  muNow.textContent=TIPO[p.tipo]||'Música';spNome(p.link).then(n=>{if(muCur===p.link)muNow.textContent=n});
+  if(SPAPI){
+    if(SPC){SPC.loadUri(p.uri);if(play)setTimeout(()=>SPC.play(),400)}
+    else{const el=document.getElementById('muEmbed');SPAPI.createController(el,{uri:p.uri,width:'100%',height:80},c=>{SPC=c;c.addListener('playback_update',e=>{if(e&&e.data&&!e.data.isPaused)muStarted=true});c.addListener('ready',()=>{if(play||(muWant&&!muStarted))c.play()})})}
+  }else{
+    $('#muBody').innerHTML=`<iframe src="${esc(p.src)}" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" title="Player do Spotify"></iframe>`;
+  }
+  return true;
+}
+window.onSpotifyIframeApiReady=api=>{SPAPI=api;if(!music.hidden&&muCur&&!SPC){$('#muBody').innerHTML='<div id="muEmbed"></div>';muLoad(muCur,false)}};
+// navegadores só liberam som depois de um toque na página: o primeiro toque no painel dá o play
+function muArm(){
+  const go=e=>{if(e.target.closest&&e.target.closest('#music'))return;document.removeEventListener('pointerdown',go,true);document.removeEventListener('keydown',go,true);muWant=true;if(SPC&&!muStarted&&!music.hidden)SPC.play()};
+  document.addEventListener('pointerdown',go,true);document.addEventListener('keydown',go,true);
+}
+function muOpen(play){
+  music.hidden=false;document.body.classList.add('has-music');
+  if(!muCur)muLoad(LSg('draft_mu_atual')||muPadrao(),play);
+  else if(play&&SPC)SPC.play();
+}
 function muPick(msg){
-  muBody.innerHTML=`<form class="mu-pick" id="muForm"><input id="muLink" placeholder="Cole o link de uma playlist, álbum ou música do Spotify" autocomplete="off" aria-label="Link do Spotify"><button class="add" type="submit">Tocar</button>
-    <button class="btn2" type="button" data-sp="https://open.spotify.com/playlist/37i9dQZEVXbMXbN3EUUhlg">Top 50 Brasil</button><span class="hint">${esc(msg||'No Spotify: Compartilhar → Copiar link.')}</span></form>`;
-  $('#muForm').onsubmit=e=>{e.preventDefault();muPlay($('#muLink').value)};
-  muBody.querySelector('[data-sp]').onclick=e=>muPlay(e.target.dataset.sp);
-  music.classList.remove('min');
+  const favs=MU.favoritos||[],cur=spParse(muCur)?.uri,isPad=cur===spParse(muPadrao())?.uri;
+  muPickEl.innerHTML=`<small>Favoritos da DRAFT</small>
+    <div class="mu-fav"><button type="button" data-mu="${esc(muPadrao())}" class="${isPad?'on':''}">★ ${esc(MU.padraoNome||'Playlist da DRAFT')} <em>padrão</em></button>
+      ${favs.map((f,i)=>`<button type="button" data-mu="${esc(f.link)}" class="${spParse(f.link)?.uri===cur?'on':''}">${esc(f.nome)} <em>${esc(TIPO[spParse(f.link)?.tipo]||'')}</em></button><button type="button" class="x" data-murm="${i}" aria-label="Tirar ${esc(f.nome)} dos favoritos">×</button>`).join('')}</div>
+    <form class="mrow" id="muForm"><input id="muLink" placeholder="Cole o link de uma playlist, artista, álbum ou música" autocomplete="off" aria-label="Link do Spotify"><button class="add" type="submit">Tocar</button></form>
+    <div class="mrow"><a href="https://open.spotify.com/search" target="_blank" rel="noopener">Procurar artista no Spotify ↗</a><span class="hint">Abra o artista, toque em ··· → Compartilhar → Copiar link e cole acima.</span></div>
+    <div class="mrow">${muCur&&!(favs.some(f=>spParse(f.link)?.uri===cur))&&!isPad?`<button class="btn2" type="button" id="muSave">☆ Salvar nos favoritos</button>`:''}${muCur&&!isPad?`<button class="btn2" type="button" id="muDef">Usar como padrão do painel</button>`:''}
+      <label><input type="checkbox" id="muAutoChk"${muAuto()?' checked':''}> Tocar sozinho ao entrar neste aparelho</label></div>
+    ${msg?`<span class="hint" style="color:var(--neg)">${esc(msg)}</span>`:''}`;
+  muPickEl.hidden=false;music.classList.remove('min');
+  $('#muForm').onsubmit=e=>{e.preventDefault();if(muLoad($('#muLink').value,true)){muPickEl.hidden=true}else muPick('Esse link não é do Spotify. Copie o link de uma playlist, artista, álbum ou música.')};
+  muPickEl.querySelectorAll('[data-mu]').forEach(b=>b.onclick=()=>{muLoad(b.dataset.mu,true);muPickEl.hidden=true});
+  muPickEl.querySelectorAll('[data-murm]').forEach(b=>b.onclick=async()=>{const f=favs.slice();f.splice(+b.dataset.murm,1);MU={...MU,favoritos:f};await put('config','musica',MU);muPick()});
+  const sv=$('#muSave');if(sv)sv.onclick=async()=>{const nome=await spNome(muCur);MU={...MU,favoritos:[...favs,{nome,link:muCur}]};await put('config','musica',MU);toast('Salvo nos favoritos');muPick()};
+  const df=$('#muDef');if(df)df.onclick=async()=>{const nome=await spNome(muCur);MU={...MU,padrao:muCur,padraoNome:nome};await put('config','musica',MU);toast('Nova música padrão do painel');muPick()};
+  $('#muAutoChk').onchange=e=>LSs('draft_mu_auto',e.target.checked?null:'0');
 }
-function muPlay(link){
-  const src=spEmbed(link);if(!src){muPick('Esse link não é do Spotify. Tente de novo.');return}
-  LSs('draft_musica',link);
-  muBody.innerHTML=`<iframe src="${esc(src)}" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Player do Spotify"></iframe>`;
-}
-function muOpen(){music.hidden=false;document.body.classList.add('has-music');if(!muBody.innerHTML){const l=LSg('draft_musica');l?muPlay(l):muPick()}LSs('draft_musica_on','1')}
-$('#btnMusica').onclick=()=>{if(music.hidden)muOpen();else music.classList.toggle('min')};
-$('#muMin').onclick=()=>music.classList.toggle('min');
-$('#muTrocar').onclick=()=>muPick();
-$('#muClose').onclick=()=>{music.hidden=true;muBody.innerHTML='';document.body.classList.remove('has-music');LSs('draft_musica_on',null)};
-if(LSg('draft_musica_on'))muOpen();
+$('#btnMusica').onclick=()=>{if(music.hidden)muOpen(true);else music.classList.toggle('min')};
+$('#muMin').onclick=()=>{music.classList.toggle('min');muPickEl.hidden=true};
+$('#muTrocar').onclick=()=>{if(!muPickEl.hidden){muPickEl.hidden=true;return}muPick()};
+$('#muClose').onclick=()=>{music.hidden=true;muPickEl.hidden=true;document.body.classList.remove('has-music');if(SPC)SPC.pause()};
 
 /* ---------- dados: Firebase (sincroniza entre os sócios e guarda cópia offline no aparelho) ---------- */
 const firebaseConfig={
@@ -1697,6 +1746,7 @@ function start(){
     if(c==='artistas'&&!snap.metadata.fromCache)igAuto();
   },e=>{if(e.code==='permission-denied')showStatus('Seu e-mail ('+(auth.currentUser&&auth.currentUser.email)+') não está liberado neste painel. Peça a um sócio para adicionar nas regras do Firebase.');else showStatus('A conexão com os dados caiu. Recarregue a página.')})));
   unsubs.push(db.doc('config/instagram').onSnapshot(s=>{IG=s.exists&&s.data().token?s.data():null;igAuto()},()=>{}));
+  unsubs.push(db.doc('config/musica').onSnapshot(s=>{MU=s.exists?{favoritos:[],...s.data()}:{padrao:'',favoritos:[]}},()=>{}));
   unsubs.push(db.doc('config/metas').onSnapshot(s=>{S.meta=s.exists?s.data():{};softRender()},()=>{}));
   unsubs.push(db.doc('config/socios').onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().nomes)){S.socios=s.data().nomes.slice(0,3);softRender()}},()=>{}));
   seedOnce();
@@ -1705,10 +1755,12 @@ auth.onAuthStateChanged(u=>{
   $('#btnSair').title=u?'Sair ('+u.email+')':'Sair';
   if(!u){unsubs.forEach(f=>f());unsubs=[];COLLS.forEach(c=>S.data[c]=[]);loginEl.hidden=false;render();return}
   loginEl.hidden=true;forced='';showStatus();start();
+  if(muAuto()&&music.hidden){muOpen(false);muArm()}
 });
 render();showStatus();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 })();
 </script>
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
 </body>
 </html>
