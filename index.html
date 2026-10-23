@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Painel DRAFT</title>
-<meta name="theme-color" content="#0D0E10">
+<meta name="theme-color" content="#0B0C0E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,95 +13,117 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
 <style>
-/* Layout: cabeçalho fixo com abas tipo placar; conteúdo em linhas (não cards), resumo antes do detalhe */
+/* Layout: cabeçalho fixo com abas; o elenco vira cartas de jogador (a única peça ousada), o resto fica em linhas sóbrias */
 :root{
-  --bg:#0D0E10; --panel:#15171A; --line:#25282D; --fg:#ECEDEE; --mut:#8C9199;
+  --bg:#0B0C0E; --panel:#141619; --panel2:#1C1F23; --line:#262A30; --fg:#EDEEEF; --mut:#8D939B;
   --acc:#E2B33C; --acc-ink:#111; --pos:#55B880; --neg:#E2685A; --info:#7BA7D9;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --blur-op:.38;
   color-scheme:dark;
 }
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
-  --bg:#F4F4F2; --panel:#FFFFFF; --line:#E0E0DC; --fg:#15161A; --mut:#676B73;
-  --acc:#A97B10; --acc-ink:#fff; --pos:#2C8A55; --neg:#C04637; --info:#2F6AA8; color-scheme:light}}
+  --bg:#F3F3F1; --panel:#FFFFFF; --panel2:#ECECE8; --line:#DFDFDA; --fg:#15161A; --mut:#676B73;
+  --acc:#A97B10; --acc-ink:#fff; --pos:#2C8A55; --neg:#C04637; --info:#2F6AA8; --blur-op:.22; color-scheme:light}}
 :root[data-theme="light"]{
-  --bg:#F4F4F2; --panel:#FFFFFF; --line:#E0E0DC; --fg:#15161A; --mut:#676B73;
-  --acc:#A97B10; --acc-ink:#fff; --pos:#2C8A55; --neg:#C04637; --info:#2F6AA8; color-scheme:light}
+  --bg:#F3F3F1; --panel:#FFFFFF; --panel2:#ECECE8; --line:#DFDFDA; --fg:#15161A; --mut:#676B73;
+  --acc:#A97B10; --acc-ink:#fff; --pos:#2C8A55; --neg:#C04637; --info:#2F6AA8; --blur-op:.22; color-scheme:light}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0}
-main{padding-bottom:env(safe-area-inset-bottom,0px)}
-[hidden]{display:none!important}
-body{background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);font-variant-numeric:tabular-nums}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);font-variant-numeric:tabular-nums}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+[hidden]{display:none!important}
+img{max-width:100%}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
+a{color:inherit}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 
+/* cabeçalho */
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 .top{display:flex;align-items:center;gap:12px;padding-block:14px 10px}
 .mark{width:38px;height:38px;background:#000;color:#fff;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--display);letter-spacing:.04em;flex:none;border:1px solid var(--line)}
 .mark span{display:block;text-align:center}
 .mark i{display:block;height:2px;width:20px;background:#E2B33C;margin:2px auto}
 .brand{min-width:0}
-.brand b{font:700 20px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;display:block}
+.brand b{font:800 21px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;display:block}
 .brand small{color:var(--mut);font-size:12px}
 .top .sp{flex:1}
 .ghost{background:none;border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-size:13px;color:var(--mut)}
 .ghost:hover{color:var(--fg);border-color:var(--mut)}
+.who{font-size:12px;color:var(--mut);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:520px){.who{display:none}.hide-sm{display:none}.top{gap:8px}.top .ghost{padding:6px 9px}}
+@media (max-width:400px){.brand small{display:none}}
+.brand small{white-space:nowrap}
 nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-bottom:-1px}
 nav::-webkit-scrollbar{display:none}
 nav button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px 10px;font:600 15px/1 var(--display);letter-spacing:.07em;text-transform:uppercase;color:var(--mut);white-space:nowrap}
 nav button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--acc)}
 
-main{padding-block:20px 64px}
+main{padding-block:20px calc(72px + env(safe-area-inset-bottom,0px))}
 .note{font-size:13px;color:var(--mut);border:1px dashed var(--line);padding:8px 12px;border-radius:4px;margin-bottom:16px}
-.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-.bar h2{font:700 24px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0;flex:1;min-width:0}
-.add{background:var(--acc);color:var(--acc-ink);border:0;border-radius:4px;padding:8px 14px;font-weight:600;font-size:14px}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.bar h2{font:800 28px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0;flex:1;min-width:0}
+.sub{color:var(--mut);font-size:14px;margin:-6px 0 16px;max-width:64ch}
+.add{background:var(--acc);color:var(--acc-ink);border:0;border-radius:4px;padding:8px 14px;font-weight:600;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn2{background:none;border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;color:var(--fg)}
+.btn2:hover{border-color:var(--mut)}
+.btn2[disabled]{opacity:.55;cursor:default}
 .month{display:flex;align-items:center;border:1px solid var(--line);border-radius:4px}
 .month button{background:none;border:0;padding:6px 10px;color:var(--mut);font-size:16px}
 .month span{min-width:96px;text-align:center;font-weight:600;font-size:14px;text-transform:capitalize}
-h3{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:28px 0 10px}
+h3{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:30px 0 12px}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .accc{color:var(--acc)}
 
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:4px;background:var(--panel)}
 .kpi{padding:14px 16px;border-left:1px solid var(--line);min-width:0}
 .kpi:first-child{border-left:0}
 .kpi label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px}
-.kpi b{font:700 24px/1.1 var(--display);letter-spacing:.02em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi b{font:700 25px/1.1 var(--display);letter-spacing:.02em;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi em{font-style:normal;font-size:12px;color:var(--mut)}
 @media (max-width:640px){.kpis{grid-template-columns:1fr 1fr}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--line)}}
 
-.pos{color:var(--pos)} .neg{color:var(--neg)}
 .rows{border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 2px;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;align-items:center}
-button.row:hover{background:var(--panel)}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 2px;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;align-items:center;color:var(--fg)}
+button.row:hover,.row.st:hover{background:var(--panel)}
 .row .t{font-weight:600;min-width:0;overflow-wrap:anywhere}
 .row .s{grid-column:1;font-size:13px;color:var(--mut);min-width:0;overflow-wrap:anywhere}
 .row .r{grid-row:1 / span 2;grid-column:2;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .row .v{font-weight:600;white-space:nowrap}
+.row.withav{grid-template-columns:44px 1fr auto}
+.row.withav .av{grid-row:1 / span 2}
+.row.withav .t,.row.withav .s{grid-column:2}
+.row.withav .r{grid-column:3}
+.row.st{position:relative}
+.open{background:none;border:0;padding:0;font-weight:600;text-align:left;cursor:pointer;color:var(--fg)}
+.open::after{content:"";position:absolute;inset:0}
+.ig{position:relative;z-index:1;color:var(--acc);font-weight:500;text-decoration:none;white-space:nowrap;font-size:14px}
+.ig:hover{text-decoration:underline}
 .date{display:grid;grid-template-columns:52px 1fr auto;gap:12px}
 .date .d{grid-row:1 / span 2;text-align:center;border-right:1px solid var(--line);padding-right:10px}
 .date .d b{font:700 22px/1 var(--display);display:block}
 .date .d small{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
 .date .t,.date .s{grid-column:2}
 .date .r{grid-column:3}
-.pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+.pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap;background:var(--bg)}
 .p-mut{color:var(--mut)} .p-acc{color:var(--acc)} .p-pos{color:var(--pos)} .p-neg{color:var(--neg)} .p-info{color:var(--info)}
 .empty{padding:28px 4px;color:var(--mut);border-bottom:1px solid var(--line);font-size:14px}
 .empty b{color:var(--fg);display:block;margin-bottom:2px}
+.late{color:var(--neg)}
 
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .chip{background:none;border:1px solid var(--line);border-radius:999px;padding:4px 11px;font-size:13px;color:var(--mut)}
 .chip[aria-pressed="true"]{border-color:var(--fg);color:var(--fg)}
-.search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 12px;margin-bottom:12px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.search{flex:1;min-width:180px;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 12px}
+.sel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 10px}
 
-.two{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
+.two{display:grid;grid-template-columns:1.3fr 1fr;gap:32px}
 .two>div{min-width:0}
-@media (max-width:760px){.two{grid-template-columns:1fr;gap:0}}
+@media (max-width:780px){.two{grid-template-columns:1fr;gap:0}}
 .funnel{display:flex;height:10px;border-radius:2px;overflow:hidden;background:var(--line);margin:4px 0 10px}
 .funnel i{display:block;height:100%}
 .legend{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:14px}
@@ -111,7 +133,7 @@ button.row:hover{background:var(--panel)}
 .split div{padding:12px 14px;border-left:1px solid var(--line);min-width:0}
 .split div:first-child{border-left:0}
 .split label{font-size:13px;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.split b{font:700 20px/1.2 var(--display);display:block}
+.split b{font:700 21px/1.2 var(--display);display:block}
 .split em{font-style:normal;font-size:12px;color:var(--mut)}
 @media (max-width:480px){.split{grid-template-columns:1fr}.split div{border-left:0;border-top:1px solid var(--line)}.split div:first-child{border-top:0}}
 .chart{overflow-x:auto}
@@ -119,61 +141,241 @@ button.row:hover{background:var(--panel)}
 .key{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-top:6px}
 .key span::before{content:"";display:inline-block;width:8px;height:8px;margin-right:6px;background:var(--c)}
 
-.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
-.sheet form{background:var(--bg);border:1px solid var(--line);width:100%;max-width:560px;max-height:92%;overflow-y:auto;border-radius:8px 8px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+/* avatar */
+.av{width:44px;height:44px;border-radius:4px;overflow:hidden;background:var(--panel2);display:grid;place-items:center;font:700 16px/1 var(--display);color:var(--mut);flex:none}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.av.sm{width:30px;height:30px;font-size:12px}
+.av.lg{width:56px;height:56px;font-size:20px}
+.av.logo{background:#fff}
+.av.logo img{object-fit:contain}
+
+/* ===== carta de jogador ===== */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:16px}
+.cards.top4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:700px){.cards.top4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:380px){.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+.pcard{--cut:7%;position:relative;display:block;width:100%;aspect-ratio:5/7;border:0;padding:0;overflow:hidden;text-align:left;color:var(--ink);background:var(--tbg);font-family:var(--display);container-type:inline-size;
+  clip-path:polygon(0 var(--cut),var(--cut) 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);transition:transform .18s ease,filter .18s ease}
+.pcard:hover{transform:translateY(-3px);filter:brightness(1.05)}
+.pcard::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(118deg,var(--sheen) 0 1px,transparent 1px 7px);pointer-events:none;z-index:1}
+.pcard::after{content:"";position:absolute;inset:3.5%;border:1px solid var(--edge);clip-path:inherit;pointer-events:none;z-index:3}
+.pc-img{position:absolute;right:0;top:0;width:80%;height:66%;z-index:0}
+.pc-img img{width:100%;height:100%;object-fit:cover;display:block;-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent 98%),linear-gradient(to right,transparent 0,#000 22%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,#000 62%,transparent 98%),linear-gradient(to right,transparent 0,#000 22%);mask-composite:intersect}
+.pc-img i{display:grid;place-items:center;height:100%;font-style:normal;font-weight:800;font-size:34cqw;opacity:.28;letter-spacing:-.02em}
+.pc-ger{position:absolute;left:9%;top:9%;z-index:2;display:flex;flex-direction:column;align-items:center;line-height:.86}
+.pc-ger b{font-weight:800;font-size:25cqw;letter-spacing:-.02em}
+.pc-ger small{font-weight:700;font-size:7.5cqw;letter-spacing:.12em}
+.pc-ger em{font-style:normal;font-weight:700;font-size:6.5cqw;letter-spacing:.06em;margin-top:5cqw;padding:1.5cqw 2.5cqw;border:1px solid var(--edge);opacity:.9}
+.pc-pos{position:absolute;left:7%;top:50%;z-index:2;font-weight:700;font-size:5.6cqw;letter-spacing:.06em;text-transform:uppercase;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-name{position:absolute;left:8%;right:8%;top:64%;z-index:2;text-align:center;font-weight:800;font-size:10.5cqw;line-height:1.1;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:2.5cqw;border-bottom:1px solid var(--edge)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:14px}
+.seg button{background:none;border:0;padding:8px 14px;font:600 15px/1 var(--display);letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.pc-attrs{position:absolute;left:9%;right:9%;top:78.5%;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5cqw 2cqw}
+.pc-attrs span{display:flex;gap:1.5cqw;align-items:baseline;justify-content:center;font-weight:600;font-size:5.4cqw;letter-spacing:.02em;white-space:nowrap;overflow:hidden}
+.pc-attrs b{font-weight:800;font-size:8cqw}
+.t-bronze{--tbg:linear-gradient(155deg,#5b3a26 0%,#b77f55 38%,#d7a77d 50%,#8b5d3f 72%,#4c3020 100%);--ink:#22140a;--edge:rgba(34,20,10,.35);--sheen:rgba(255,235,210,.08)}
+.t-prata{--tbg:linear-gradient(155deg,#6c737a 0%,#c9ced3 38%,#eef0f2 50%,#a3a9af 72%,#5f656c 100%);--ink:#16191d;--edge:rgba(22,25,29,.3);--sheen:rgba(255,255,255,.12)}
+.t-ouro{--tbg:linear-gradient(155deg,#7d5a14 0%,#d8b14f 36%,#f6df92 50%,#c69c3a 70%,#6f4f10 100%);--ink:#241903;--edge:rgba(36,25,3,.32);--sheen:rgba(255,248,220,.14)}
+.t-elite{--tbg:radial-gradient(120% 80% at 70% 10%,#2b2512 0%,transparent 60%),linear-gradient(155deg,#050506 0%,#16140f 50%,#070708 100%);--ink:#F2D37C;--edge:rgba(226,179,60,.55);--sheen:rgba(226,179,60,.07)}
+.t-none{--tbg:linear-gradient(155deg,var(--panel2),var(--panel));--ink:var(--fg);--edge:var(--line);--sheen:transparent}
+.pcard.big{max-width:280px}
+
+/* ===== quadro de draft ===== */
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}
+@media (max-width:760px){.board{grid-template-columns:repeat(3,84%)}}
+.col{scroll-snap-align:start;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.col h4{margin:0 0 2px;font:700 16px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between}
+.col h4 span{color:var(--mut)}
+.pros{position:relative;display:grid;grid-template-columns:56px 1fr;gap:4px 12px;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.pros .av{grid-row:1 / span 3}
+.pros .nm{min-width:0}
+.pros .nm .open{font-size:15px}
+.pros .meta{font-size:12px;color:var(--mut)}
+.pros .rt{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge{font:700 13px/1 var(--display);letter-spacing:.06em;padding:3px 6px;border-radius:3px;background:var(--panel2)}
+.badge.g{background:var(--fg);color:var(--bg)}
+.pros .go{grid-column:1 / -1;display:flex;gap:6px;margin-top:6px;position:relative;z-index:1}
+.pros .go button{flex:1;padding:6px 8px;font-size:13px}
+.colempty{font-size:13px;color:var(--mut);padding:8px 2px}
+
+/* ===== ficha ===== */
+.back{background:none;border:0;color:var(--mut);padding:0;margin-bottom:14px;font-size:14px}
+.back:hover{color:var(--fg)}
+.prof{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:6px;background:var(--panel);display:grid;grid-template-columns:auto 1fr;gap:28px;padding:24px}
+.prof-bg{position:absolute;inset:-40px;background:var(--ph) center/cover;filter:blur(38px) saturate(1.25);opacity:var(--blur-op);pointer-events:none}
+.prof>*:not(.prof-bg){position:relative}
+.prof .pcard{width:240px}
+.prof-info{min-width:0;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.prof h1,.ev-hero h1{font:800 clamp(34px,6vw,58px)/.95 var(--display);text-transform:uppercase;letter-spacing:.02em;margin:0;text-wrap:balance;overflow-wrap:anywhere}
+.linkrow{display:flex;gap:14px;flex-wrap:wrap}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.gp{max-width:420px}
+.gp .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);margin-bottom:6px}
+.gp .lbl b{color:var(--fg);font:700 18px/1 var(--display);letter-spacing:.04em}
+.gp .trk{position:relative;height:8px;background:var(--line);border-radius:2px;overflow:hidden}
+.gp .trk i{position:absolute;left:0;top:0;bottom:0}
+.gp .trk .p{background:repeating-linear-gradient(135deg,var(--acc) 0 3px,transparent 3px 6px);opacity:.55}
+.gp .trk .g{background:var(--acc)}
+@media (max-width:640px){.prof{grid-template-columns:1fr;justify-items:center;text-align:center;padding:20px 16px}.prof-info{align-items:center}.linkrow,.pillrow,.acts{justify-content:center}.prof .pcard{width:min(240px,70vw)}.gp{width:100%}}
+.attrs{display:grid;grid-template-columns:1fr 1fr;gap:12px 32px}
+@media (max-width:560px){.attrs{grid-template-columns:1fr}}
+.at{display:grid;grid-template-columns:44px 1fr 36px;gap:10px;align-items:center}
+.at abbr{font:700 15px/1 var(--display);letter-spacing:.08em;text-decoration:none}
+.at .bx{display:flex;flex-direction:column;gap:4px;min-width:0}
+.at .bx small{font-size:12px;color:var(--mut)}
+.at .bx span{height:6px;background:var(--line);border-radius:2px;overflow:hidden}
+.at .bx span i{display:block;height:100%;background:currentColor}
+.at b{font:800 22px/1 var(--display);text-align:right}
+.hi{color:var(--pos)} .md{color:var(--acc)} .lo{color:var(--neg)} .na{color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+.stats div{padding:14px 16px;border-left:1px solid var(--line);border-top:1px solid var(--line);margin:-1px 0 0 -1px;min-width:0}
+.stats label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px}
+.stats b{font:700 23px/1.1 var(--display);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats em{font-style:normal;font-size:12px;color:var(--mut)}
+.dl{display:grid;grid-template-columns:max-content 1fr;gap:8px 18px;font-size:14px}
+.dl dt{color:var(--mut)}
+.dl dd{margin:0;min-width:0;overflow-wrap:anywhere;user-select:text}
+.txt{white-space:pre-wrap;max-width:70ch;color:var(--fg);margin:0}
+.spark svg{display:block;width:100%;height:auto;max-height:180px}
+
+/* eventos */
+.evgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.ecard{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--panel);padding:0;text-align:left;color:var(--fg);width:100%}
+.ecard:hover{border-color:var(--mut)}
+.ec-img{position:relative;display:block;aspect-ratio:16/9;background:var(--panel2);overflow:hidden}
+.ec-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ec-img .pill{position:absolute;left:10px;top:10px}
+.mono{position:absolute;inset:0;display:grid;place-items:center;font:800 44px/1 var(--display);letter-spacing:.04em;color:var(--mut);opacity:.5;background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(127,127,127,.06) 10px 11px)}
+.ec-body{display:flex;flex-direction:column;gap:3px;padding:12px 14px 14px}
+.ec-body b{font-size:16px}
+.ec-body small{font-size:13px;color:var(--mut)}
+.ec-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.ec-num{display:flex;gap:10px;font-size:13px;font-weight:600;flex-wrap:wrap}
+.stack{display:flex}
+.stack .av{border:2px solid var(--panel);margin-left:-8px}
+.stack .av:first-child{margin-left:0}
+.ev-hero{position:relative;border-radius:6px;overflow:hidden;background:var(--panel2);aspect-ratio:21/8;min-height:220px;display:flex;align-items:flex-end}
+.ev-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ev-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.1) 65%)}
+.ev-hero .htxt{position:relative;z-index:1;padding:20px;color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.ev-hero .htxt p{margin:0;color:rgba(255,255,255,.8)}
+.ev-hero .mono{color:#fff;opacity:.15;font-size:110px}
+.artchips{display:flex;gap:8px;flex-wrap:wrap}
+.artchip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:4px;padding:5px 10px 5px 5px;background:var(--panel);font-weight:600;font-size:14px}
+.artchip:hover{border-color:var(--mut)}
+
+/* vídeos */
+.media{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.vid{display:flex;flex-direction:column;gap:6px;min-width:0}
+.vid iframe{width:100%;aspect-ratio:9/16;border:0;border-radius:6px;background:var(--panel2)}
+.vid.wide iframe{aspect-ratio:16/9}
+.vid a{font-size:12px;color:var(--mut);text-decoration:none}
+.vid a:hover{color:var(--fg)}
+@media (min-width:600px){.vid.wide{grid-column:span 2}}
+.linklist{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:14px}
+.linklist a{color:var(--acc);overflow-wrap:anywhere}
+
+/* formulário */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet form{background:var(--bg);border:1px solid var(--line);width:100%;max-width:640px;max-height:94%;overflow-y:auto;border-radius:8px 8px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 @media (min-width:700px){.sheet{align-items:center}.sheet form{border-radius:6px}}
-.sheet h2{font:700 22px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0 0 16px}
+.sheet h2{font:800 24px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0 0 16px}
 .f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .f .full{grid-column:1 / -1}
 .f label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut);min-width:0}
-.f input,.f select,.f textarea{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 10px;font-size:15px;color:var(--fg);width:100%;min-width:0}
+.f input:not([type=range]):not([type=checkbox]),.f select,.f textarea{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:9px 10px;font-size:15px;color:var(--fg);width:100%;min-width:0}
 .f textarea{min-height:70px;resize:vertical}
+.fsec{grid-column:1 / -1;font:700 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--fg);border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+.fsec:first-child{border-top:0;padding-top:0;margin-top:0}
+.fsec small{display:block;font:400 12px/1.4 var(--body);letter-spacing:0;text-transform:none;color:var(--mut);margin-top:4px}
+.rng .rh{display:flex;justify-content:space-between;align-items:baseline}
+.rng .rh b{font:700 18px/1 var(--display);color:var(--fg)}
+.rng .rh b.unset{font:400 12px/1 var(--body);color:var(--mut)}
+.rng input{width:100%;accent-color:var(--acc)}
+.foto{display:flex;align-items:center;gap:14px}
+.foto .fprev{width:84px;height:84px;border-radius:4px;background:var(--panel2);overflow:hidden;display:grid;place-items:center;font-size:12px;color:var(--mut);flex:none}
+.foto.capa .fprev{width:160px;height:90px}
+.foto .fprev img{width:100%;height:100%;object-fit:cover}
+.foto.logo .fprev{background:#fff}
+.foto.logo .fprev img{object-fit:contain}
+.foto .fb{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.fpick{position:relative;overflow:hidden}
+.fpick input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .checks{display:flex;flex-wrap:wrap;gap:6px}
 .checks label{flex-direction:row;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-size:14px;color:var(--fg)}
-.actions{display:flex;gap:8px;margin-top:18px;align-items:center}
+.actions{display:flex;gap:8px;margin-top:18px;align-items:center;flex-wrap:wrap}
 .actions .sp{flex:1}
 .del{background:none;border:1px solid var(--line);color:var(--neg);border-radius:4px;padding:8px 12px;font-size:14px}
 .del.armed{background:var(--neg);color:#fff;border-color:var(--neg)}
-.cancel{background:none;border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:14px}
-.err{color:var(--neg);font-size:13px;margin-top:10px}
-.row.st{position:relative}
-.row.st:hover{background:var(--panel)}
-.open{background:none;border:0;padding:0;font-weight:600;text-align:left;cursor:pointer;color:var(--fg)}
-.open::after{content:"";position:absolute;inset:0}
-.open:focus-visible{outline:0}.open:focus-visible::after{outline:2px solid var(--acc);outline-offset:-2px}
-.ig{position:relative;z-index:1;color:var(--acc);font-weight:500;text-decoration:none;white-space:nowrap}
-.ig:hover{text-decoration:underline}
-.iglink{font-size:13px;color:var(--acc);text-decoration:none;margin-top:4px}
-.late{color:var(--neg)}
-.actions{flex-wrap:wrap}
 .hint{font-size:12px;color:var(--mut)}
-.tips{display:grid;gap:8px}
+.err{color:var(--neg);font-size:13px;margin-top:10px}
+.iglink{font-size:13px;color:var(--acc);text-decoration:none;margin-top:4px}
+@media (max-width:440px){.f{grid-template-columns:1fr}}
+
+/* dicas */
 .tip p{max-width:68ch;color:var(--mut);margin:0 0 10px}
-.tip ul,.tip ol{margin:0;padding-left:20px;display:grid;gap:10px;max-width:70ch}
+.tip ul{margin:0;padding-left:20px;display:grid;gap:10px;max-width:70ch}
 .tip li b{display:block}
 .tip li span{color:var(--mut)}
-.ref{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.ref{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
 .ref div{padding:12px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
 .ref b{display:block;margin-bottom:2px}
 .ref small{color:var(--mut);font-size:13px;display:block}
-@media (max-width:420px){.f{grid-template-columns:1fr}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
- .login{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
-.login>div{display:grid;gap:14px;justify-items:center;text-align:center;max-width:340px}
-.login .mark{width:72px;height:72px;font-size:22px}
-.login .mark i{width:38px;height:3px}
-.login h1{font:700 30px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;margin:6px 0 0}
+.scale{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:560px}
+.scale div{border-radius:4px;padding:10px 12px;color:var(--ink);background:var(--tbg);font-family:var(--display)}
+.scale b{display:block;font-weight:800;font-size:20px}
+.scale small{font-weight:600;font-size:13px;letter-spacing:.05em}
+@media (max-width:480px){.scale{grid-template-columns:1fr 1fr}}
+
+/* login */
+.login{position:fixed;inset:0;z-index:30;background:var(--bg);display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.login>div{display:grid;gap:14px;justify-items:center;text-align:center;max-width:360px}
+.login .mark{width:76px;height:76px;font-size:23px}
+.login .mark i{width:40px;height:3px}
+.login h1{font:800 46px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;margin:6px 0 0}
 .login p{color:var(--mut);margin:0;font-size:14px}
-.gbtn{display:flex;align-items:center;gap:10px;background:var(--fg);color:var(--bg);border:0;border-radius:4px;padding:11px 18px;font-weight:600;font-size:15px}
-.who{font-size:12px;color:var(--mut);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media (max-width:480px){.who{display:none}}
+.login .tag{font-size:15px;color:var(--fg);line-height:1.5}
+.gbtn{display:flex;align-items:center;gap:10px;background:var(--fg);color:var(--bg);border:0;border-radius:4px;padding:11px 18px;font-weight:600;font-size:15px;margin-top:6px}
+
+/* música */
+.music{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -8px 24px rgba(0,0,0,.25)}
+.mu-in{padding-block:8px 10px}
+.mu-bar{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.mu-bar b{font:700 15px/1 var(--display);letter-spacing:.08em;text-transform:uppercase}
+.mu-bar .sp{flex:1}
+.mu-bar .ghost{padding:4px 8px;font-size:12px}
+.mu-body iframe{display:block;width:100%;height:80px;border:0;border-radius:12px}
+.mu-pick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mu-pick input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 10px}
+.mu-pick .hint{flex-basis:100%}
+.music.min .mu-body{height:0;overflow:hidden}
+.music.min .mu-in{padding-block:6px}
+.music.min .mu-bar{margin-bottom:0}
+body.has-music main{padding-bottom:calc(200px + env(safe-area-inset-bottom,0px))}
+body.has-music .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+
+/* toast e momento draftado */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:4px;font-size:14px;font-weight:600;max-width:calc(100% - 32px)}
+.fx{position:fixed;inset:0;z-index:50;background:rgba(5,5,6,.9);display:grid;place-items:center;padding:24px}
+.fx .in{display:grid;justify-items:center;gap:14px;text-align:center}
+.fx .pcard{width:min(250px,62vw);animation:fxcard .9s cubic-bezier(.2,.9,.25,1.2) both}
+.fx .ft{font:800 clamp(44px,12vw,84px)/.9 var(--display);letter-spacing:.12em;text-transform:uppercase;color:#F2D37C;margin:0;animation:fxtxt .7s .45s ease-out both}
+.fx .fs{color:#d7d7d7;margin:0;font-size:15px;animation:fxtxt .6s .7s ease-out both}
+.fx::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(226,179,60,.35),transparent 55%);animation:fxglow 1.4s ease-out both;pointer-events:none}
+@keyframes fxcard{from{transform:scale(.55) rotateY(70deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes fxtxt{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fxglow{0%{opacity:0}30%{opacity:1}100%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="login" id="login" hidden><div>
   <div class="mark" aria-hidden="true"><div><span>DR</span><i></i><span>FT</span></div></div>
   <h1>Draft</h1>
-  <p>Painel interno dos sócios.</p>
+  <p class="tag">Talento é o nosso ponto de partida.<br>Marcas são parte do próximo movimento.</p>
   <button class="gbtn" id="btnLogin" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>
   <p id="loginMsg"></p>
 </div></div>
@@ -185,7 +387,8 @@ button.row:hover{background:var(--panel)}
       <div class="brand"><b>Draft</b><small>Publicidade e Marketing</small></div>
       <div class="sp"></div>
       <span class="who" id="who"></span>
-      <button class="ghost" id="btnSocios" type="button">Sócios</button>
+      <button class="ghost" id="btnMusica" type="button" aria-label="Música">♫<span class="hide-sm"> Música</span></button>
+      <button class="ghost" id="btnSocios" type="button">Ajustes</button>
       <button class="ghost" id="btnSair" type="button">Sair</button>
     </div>
     <nav role="tablist" id="tabs">
@@ -199,43 +402,72 @@ button.row:hover{background:var(--panel)}
     </nav>
   </div>
 </header>
-<main class="wrap">
+<main class="wrap" id="main">
   <div id="status" class="note" hidden></div>
   <div id="view"></div>
+  <div id="mslot"></div>
+  <div id="view2"></div>
 </main>
 <div id="sheet" class="sheet" hidden></div>
+<div id="music" class="music" hidden>
+  <div class="wrap mu-in">
+    <div class="mu-bar"><b>♫ Música</b><span class="sp"></span><button class="ghost" id="muTrocar" type="button">Trocar</button><button class="ghost" id="muMin" type="button">Minimizar</button><button class="ghost" id="muClose" type="button" aria-label="Fechar música">Fechar</button></div>
+    <div class="mu-body" id="muBody"></div>
+  </div>
+</div>
+<div id="fx" class="fx" hidden></div>
+<div id="toast" class="toast" hidden></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 (function(){
+const $=s=>document.querySelector(s);
 const COLLS=['artistas','marcas','agenda','eventos','financeiro'];
-const ST_MARCA=['A prospectar','Primeiro contato','Reunião marcada','Proposta enviada','Fechado','Perdido'];
+const ST_ART=['Observando','Contato feito','Em negociação','Ativo','Pausado'];
+const DRAFT_COLS=['Observando','Contato feito','Em negociação'];
 const ST_EVENTO=['Prospecção','Proposta enviada','Fechado','Realizado','Pago'];
-const ST_COLOR={'Prospecção':'p-mut','Proposta enviada':'p-info','Fechado':'p-acc','Realizado':'p-pos','Pago':'p-pos','Ativo':'p-pos','Em negociação':'p-acc','Pausado':'p-mut','Pendente':'p-acc','A prospectar':'p-mut','Primeiro contato':'p-info','Reunião marcada':'p-info','Perdido':'p-neg','Atrasado':'p-neg','Contrato vence':'p-neg'};
-const MARCA_C={'A prospectar':'var(--mut)','Primeiro contato':'var(--info)','Reunião marcada':'color-mix(in srgb,var(--info) 60%,var(--fg))','Proposta enviada':'var(--acc)','Fechado':'var(--pos)','Perdido':'var(--neg)'};
+const ST_MARCA=['A prospectar','Primeiro contato','Reunião marcada','Proposta enviada','Fechado','Perdido'];
+const ST_LABEL={'Ativo':'No elenco'};
+const ST_COLOR={'Prospecção':'p-mut','Proposta enviada':'p-info','Fechado':'p-acc','Realizado':'p-pos','Pago':'p-pos','Ativo':'p-pos','Em negociação':'p-acc','Pausado':'p-mut','Observando':'p-mut','Contato feito':'p-info','Pendente':'p-acc','A prospectar':'p-mut','Primeiro contato':'p-info','Reunião marcada':'p-info','Perdido':'p-neg','Atrasado':'p-neg','Contrato vence':'p-neg'};
 const FUNNEL_C={'Prospecção':'var(--mut)','Proposta enviada':'var(--info)','Fechado':'var(--acc)','Realizado':'var(--pos)','Pago':'color-mix(in srgb,var(--pos) 55%,var(--fg))'};
+const MARCA_C={'A prospectar':'var(--mut)','Primeiro contato':'var(--info)','Reunião marcada':'color-mix(in srgb,var(--info) 60%,var(--fg))','Proposta enviada':'var(--acc)','Fechado':'var(--pos)','Perdido':'var(--neg)'};
+const ATTR_N={ALC:'Alcance',ENG:'Engajamento',VIS:'Views por vídeo',IMG:'Imagem com marcas',PRO:'Profissionalismo',CON:'Qualidade do conteúdo'};
+
 const SCHEMA={
   artistas:{nome:'artista',f:[
+    {sec:'Perfil'},
+    {k:'foto',l:'Foto',t:'foto',kind:'sq',full:1},
     {k:'nome',l:'Nome artístico',req:1,full:1},
-    {k:'insta',l:'Instagram',t:'insta',ph:'@usuario'},
-    {k:'segmento',l:'Nicho',ph:'Futebol, humor, pagode…'},
+    {k:'insta',l:'Instagram',t:'insta',ph:'@usuario',sync:1},
+    {k:'tiktok',l:'TikTok',t:'tiktok',ph:'@usuario'},
+    {k:'segmento',l:'Nicho (a posição dele)',ph:'Futebol, humor, pagode…'},
+    {k:'cidade',l:'Cidade'},
+    {k:'status',l:'Situação',t:'select',o:ST_ART},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {sec:'Números do Instagram',hint:'Viram os atributos ALC, ENG e VIS da carta.'},
     {k:'seguidores',l:'Seguidores',t:'num',ph:'Ex.: 85000'},
     {k:'engaj',l:'Engajamento (%)',t:'num',ph:'Ex.: 4,5'},
     {k:'views',l:'Views médias por Reels',t:'num',ph:'Ex.: 40000'},
-    {k:'cidade',l:'Cidade'},
+    {sec:'Avaliação do olheiro',hint:'Nota de 1 a 99. Arraste para dar a nota; sem nota, o atributo fica de fora do GER.'},
+    {k:'img',l:'IMG · Imagem com marcas',t:'range'},
+    {k:'pro',l:'PRO · Profissionalismo',t:'range'},
+    {k:'ent',l:'CON · Qualidade do conteúdo',t:'range'},
+    {k:'pot',l:'POT · Potencial',t:'range'},
+    {sec:'Valores e contrato'},
     {k:'reels',l:'Preço Reels (R$)',t:'money'},
     {k:'stories',l:'Preço Stories (R$)',t:'money'},
     {k:'cache',l:'Cachê presença (R$)',t:'money'},
     {k:'comissao',l:'Comissão DRAFT (%)',t:'num',ph:'Ex.: 20'},
-    {k:'contato',l:'Contato',ph:'Telefone ou e-mail'},
     {k:'exclusivo',l:'Exclusividade',t:'select',o:['Não','Sim, por segmento','Sim, total']},
     {k:'contratoAte',l:'Contrato até',t:'date'},
-    {k:'status',l:'Status',t:'select',o:['Ativo','Em negociação','Pausado']},
-    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {k:'contato',l:'Contato',ph:'Telefone ou e-mail',full:1},
+    {sec:'Destaques',hint:'Cole links de Reels, TikTok ou YouTube. Eles aparecem como vídeos na ficha.'},
+    {k:'destaques',l:'Links de vídeos (um por linha)',t:'area',full:1,ph:'https://www.instagram.com/reel/…'},
     {k:'obs',l:'Observações',t:'area',full:1}]},
   marcas:{nome:'marca',f:[
+    {k:'logo',l:'Logo',t:'foto',kind:'logo',full:1},
     {k:'marca',l:'Marca',req:1},
     {k:'grupo',l:'Empresa / grupo',ph:'Ex.: Heineken Brasil'},
     {k:'segmento',l:'Segmento',ph:'Bebidas, esporte, delivery…'},
@@ -259,17 +491,27 @@ const SCHEMA={
     {k:'local',l:'Local'},
     {k:'obs',l:'Observações',t:'area',full:1}]},
   eventos:{nome:'evento',f:[
+    {sec:'Evento'},
+    {k:'capa',l:'Foto de capa',t:'foto',kind:'capa',full:1},
     {k:'nome',l:'Nome do evento / ação',req:1,full:1},
     {k:'marca',l:'Marca ou cliente',t:'marcalist'},
     {k:'data',l:'Data',t:'date'},
     {k:'local',l:'Local'},
     {k:'status',l:'Status',t:'select',o:ST_EVENTO},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {sec:'Dinheiro'},
     {k:'valor',l:'Valor do contrato (R$)',t:'money'},
     {k:'custo',l:'Cachês e custos (R$)',t:'money'},
     {k:'vencimento',l:'Marca paga em',t:'date'},
-    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {sec:'Artistas e entregas'},
     {k:'artistas',l:'Artistas',t:'artistas',full:1},
     {k:'entregas',l:'Entregas combinadas',t:'area',full:1,ph:'Ex.: 1 Reels collab + 3 Stories + presença de 2h'},
+    {sec:'Resultado da campanha',hint:'Preencha depois da entrega. Vira case para a próxima marca.'},
+    {k:'resViews',l:'Views somadas',t:'num'},
+    {k:'resAlcance',l:'Contas alcançadas',t:'num'},
+    {k:'resInter',l:'Curtidas + comentários',t:'num'},
+    {sec:'Fotos e vídeos'},
+    {k:'links',l:'Links (um por linha)',t:'area',full:1,ph:'Reels, TikTok, YouTube ou pasta do Drive'},
     {k:'obs',l:'Observações',t:'area',full:1}]},
   financeiro:{nome:'lançamento',f:[
     {k:'desc',l:'Descrição',req:1,full:1},
@@ -283,48 +525,144 @@ const SCHEMA={
 };
 
 const S={data:{artistas:[],marcas:[],agenda:[],eventos:[],financeiro:[]},socios:['Sócio 1','Sócio 2','Sócio 3'],
-  tab:'geral',month:'',q:'',fSocio:'',fStatus:'',fTipo:'',passados:false};
-let db=null, live=false;
+  tab:'geral',artView:'elenco',detail:null,month:'',q:'',fNicho:'',pausados:false,sort:'ger',fStatus:'',fTipo:'',fSocio:'',passados:false};
+let db=null;
 
+/* ---------- utilidades ---------- */
 const pad=n=>String(n).padStart(2,'0');
 const now=new Date();
 const TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+const YEAR=TODAY.slice(0,4);
 S.month=TODAY.slice(0,7);
 const brl=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
 const money=v=>brl.format(Number(v)||0);
+const compact=new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1});
+const num=v=>(+v||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const toDate=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
 const DOW=['dom','seg','ter','qua','qui','sex','sáb'], MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESF=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const dShort=s=>{if(!s)return'';const d=toDate(s);return `${DOW[d.getDay()]}, ${d.getDate()} ${MES[d.getMonth()]}`};
+const dFull=s=>{if(!s)return'';const d=toDate(s);return `${d.getDate()} ${MES[d.getMonth()]} ${d.getFullYear()}`};
 const monthLabel=m=>{const[y,mm]=m.split('-').map(Number);return `${MESF[mm-1]} ${y}`};
 const shiftMonth=(m,k)=>{let[y,mm]=m.split('-').map(Number);mm+=k;while(mm<1){mm+=12;y--}while(mm>12){mm-=12;y++}return `${y}-${pad(mm)}`};
-const parseMoney=s=>{s=String(s??'').replace(/[R$\s]/g,'');if(!s)return 0;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');return Number(s)||0};
-const socioName=i=>(i===''||i==null)?'':(S.socios[Number(i)]||'');
-const artistaName=id=>(S.data.artistas.find(a=>a.id===id)||{}).nome||'';
-const pill=(t,cls)=>t?`<span class="pill ${cls||ST_COLOR[t]||'p-mut'}">${esc(t)}</span>`:'';
-const igHandle=v=>{v=String(v||'').trim();if(!v)return'';const m=v.match(/instagram\.com\/([^/?#\s]+)/i);if(m)v=m[1];return v.replace(/^@+/,'').replace(/[^A-Za-z0-9._]/g,'')};
-const igUrl=h=>`https://www.instagram.com/${h}/`;
-const igLink=v=>{const h=igHandle(v);return h?`<a class="ig" href="${igUrl(h)}" target="_blank" rel="noopener">@${esc(h)}</a>`:''};
-const compact=new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1});
-const num=v=>(+v||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
 const addDays=(s,n)=>{const d=toDate(s);d.setDate(d.getDate()+n);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const parseMoney=s=>{s=String(s??'').replace(/[R$%\s]/g,'');if(!s)return 0;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');return Number(s)||0};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const socioName=i=>(i===''||i==null)?'':(S.socios[Number(i)]||'');
+const art=id=>S.data.artistas.find(a=>a.id===id);
+const artistaName=id=>(art(id)||{}).nome||'';
+const stLabel=s=>ST_LABEL[s]||s;
+const pill=(t,cls)=>t?`<span class="pill ${cls||ST_COLOR[t]||'p-mut'}">${esc(stLabel(t))}</span>`:'';
 const empty=(t,s)=>`<div class="empty"><b>${esc(t)}</b>${esc(s)}</div>`;
+const initials=s=>String(s||'?').trim().split(/\s+/).map(w=>w[0]||'').slice(0,2).join('').toUpperCase()||'?';
+const handle=v=>{v=String(v||'').trim();if(!v)return'';const m=v.match(/(?:instagram|tiktok)\.com\/@?([^/?#\s]+)/i);if(m)v=m[1];return v.replace(/^@+/,'').replace(/[^A-Za-z0-9._]/g,'')};
+const igUrl=h=>`https://www.instagram.com/${h}/`;
+const ttUrl=h=>`https://www.tiktok.com/@${h}`;
+const igLink=(v,label)=>{const h=handle(v);return h?`<a class="ig" href="${igUrl(h)}" target="_blank" rel="noopener">${label||'@'+esc(h)}</a>`:''};
+const ttLink=(v,label)=>{const h=handle(v);return h?`<a class="ig" href="${ttUrl(h)}" target="_blank" rel="noopener">${label||'TikTok @'+esc(h)}</a>`:''};
+const av=(src,txt,cls)=>`<span class="av ${cls||''}">${src?`<img src="${src}" alt="" loading="lazy">`:esc(initials(txt))}</span>`;
 
-/* ---------- tabs ---------- */
-const tabs=document.getElementById('tabs');
-tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(!b)return;go(b.dataset.tab)});
-function go(t){S.tab=t;S.fStatus='';try{localStorage.setItem('draft_tab',t)}catch(e){}render();window.scrollTo(0,0)}
-try{const t=localStorage.getItem('draft_tab');if(t&&document.querySelector(`[data-tab="${t}"]`))S.tab=t}catch(e){}
-if(location.hash&&document.querySelector(`[data-tab="${location.hash.slice(1)}"]`))S.tab=location.hash.slice(1);
+/* ---------- nota do jogador ---------- */
+function attrs(a){
+  const f=+a.seguidores||0,e=+a.engaj||0,v=+a.views||0;
+  return {
+    ALC:f>0?Math.round(clamp(35+(Math.log10(f)-3)*18,20,99)):null,
+    ENG:e>0?Math.round(clamp(e<=5?40+e*9:85+(e-5)*2.5,20,99)):null,
+    VIS:v>0?Math.round(clamp(30+(Math.log10(v)-2.5)*20,20,99)):null,
+    IMG:+a.img||null, PRO:+a.pro||null, CON:+a.ent||null};
+}
+function ger(a){const vs=Object.values(attrs(a)).filter(x=>x!=null);return vs.length?Math.round(vs.reduce((s,x)=>s+x,0)/vs.length):null}
+const tier=g=>g==null?'none':g>=85?'elite':g>=75?'ouro':g>=65?'prata':'bronze';
+const TIER_N={elite:'Elite',ouro:'Ouro',prata:'Prata',bronze:'Bronze',none:'Sem nota'};
+const band=v=>v==null?'na':v>=80?'hi':v>=65?'md':'lo';
+function pcard(a,o={}){
+  const at=attrs(a),g=ger(a),t=tier(g);
+  return `<button type="button" class="pcard t-${t}${o.big?' big':''}" ${o.noclick?'tabindex="-1"':`data-prof="${a.id}"`} aria-label="${esc(a.nome)}, geral ${g??'sem nota'}">
+    <span class="pc-img">${a.foto?`<img src="${a.foto}" alt="">`:`<i>${esc(initials(a.nome))}</i>`}</span>
+    <span class="pc-ger"><b>${g??'–'}</b><small>GER</small>${a.pot?`<em>POT ${+a.pot}</em>`:''}</span>
+    <span class="pc-pos">${esc(a.segmento||'')}</span>
+    <span class="pc-name">${esc(a.nome)}</span>
+    <span class="pc-attrs">${Object.entries(at).map(([k,v])=>`<span><b>${v??'–'}</b>${k}</span>`).join('')}</span>
+  </button>`;
+}
+function evsOf(id){return S.data.eventos.filter(e=>(e.artistas||[]).includes(id))}
+const fechado=e=>['Fechado','Realizado','Pago'].includes(e.status);
 
-const view=document.getElementById('view');
-function render(){
-  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===S.tab));
-  ({geral:vGeral,artistas:vArtistas,marcas:vMarcas,agenda:vAgenda,eventos:vEventos,financeiro:vFin,dicas:vDicas})[S.tab]();
+/* ---------- vídeos ---------- */
+function embed(u){
+  u=u.trim();let m;
+  if(m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/))return{src:`https://www.youtube-nocookie.com/embed/${m[1]}`,wide:!/shorts\//.test(u),u};
+  if(m=u.match(/instagram\.com\/(?:[\w.]+\/)?(reels?|p|tv)\/([\w-]+)/))return{src:`https://www.instagram.com/${m[1]==='p'?'p':m[1]==='tv'?'tv':'reel'}/${m[2]}/embed`,u};
+  if(m=u.match(/tiktok\.com\/@[\w.]+\/video\/(\d+)/))return{src:`https://www.tiktok.com/embed/v2/${m[1]}`,u};
+  if(/^https?:\/\//i.test(u))return{link:1,u};
+  return null;
+}
+function media(text,title){
+  const items=String(text||'').split(/\s+/).filter(Boolean).map(embed).filter(Boolean);
+  if(!items.length)return null;
+  const vids=items.filter(i=>!i.link),links=items.filter(i=>i.link);
+  const html=`<h3>${esc(title)}</h3>${vids.length?`<div class="media">${vids.map(i=>`<div class="vid${i.wide?' wide':''}"><iframe src="${esc(i.src)}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen title="Vídeo"></iframe><a href="${esc(i.u)}" target="_blank" rel="noopener">Abrir original ↗</a></div>`).join('')}</div>`:''}
+    ${links.length?`<div class="linklist">${links.map(l=>`<a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.u.replace(/^https?:\/\/(www\.)?/,''))} ↗</a>`).join('')}</div>`:''}`;
+  return {key:text,html};
 }
 
-/* ---------- helpers de cálculo ---------- */
+/* ---------- navegação ---------- */
+const tabs=$('#tabs'), view=$('#view'), view2=$('#view2'), mslot=$('#mslot'), main=$('#main');
+tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)go(b.dataset.tab)});
+function go(t){S.tab=t;S.detail=null;S.fStatus='';try{localStorage.setItem('draft_tab',t)}catch(e){}if(history.state&&history.state.d)history.replaceState(null,'');render();window.scrollTo(0,0)}
+try{let t=localStorage.getItem('draft_tab');if(t==='elenco'||t==='draft')t='artistas';if(t&&document.querySelector(`[data-tab="${t}"]`))S.tab=t}catch(e){}
+if(location.hash&&document.querySelector(`[data-tab="${location.hash.slice(1)}"]`))S.tab=location.hash.slice(1);
+function openDetail(c,id){S.detail={c,id};history.pushState({d:S.detail},'');render();window.scrollTo(0,0)}
+function back(){if(history.state&&history.state.d)history.back();else{S.detail=null;render()}}
+window.addEventListener('popstate',e=>{S.detail=(e.state&&e.state.d)||null;if(!sheet.hidden)close();else render();window.scrollTo(0,0)});
+
+function paint(top,med,bottom){
+  view.innerHTML=top;view2.innerHTML=bottom||'';
+  const k=med?med.key:'';
+  if(mslot.dataset.k!==k){mslot.dataset.k=k;mslot.innerHTML=med?med.html:''}
+}
+function render(){
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',!S.detail&&b.dataset.tab===S.tab));
+  if(S.detail){
+    const r=S.data[S.detail.c].find(x=>x.id===S.detail.id);
+    if(!r){paint(`<button class="back" data-act="back" type="button">‹ Voltar</button>${empty('Registro não encontrado','Ele pode ter sido excluído por outro sócio.')}`);return}
+    return S.detail.c==='artistas'?vPerfil(r):vEvento(r);
+  }
+  ({geral:vGeral,artistas:()=>S.artView==='draft'?vDraft():vElenco(),marcas:vMarcas,agenda:vAgenda,eventos:vEventos,financeiro:vFin,dicas:vDicas})[S.tab]();
+}
+
+const ACT={
+  back:()=>back(),
+  m:t=>{S.month=shiftMonth(S.month,+t.dataset.v);render()},
+  nicho:t=>{S.fNicho=t.dataset.v;S.pausados=false;render()},
+  pausados:()=>{S.pausados=!S.pausados;S.fNicho='';render()},
+  fStatus:t=>{S.fStatus=t.dataset.v;render()},
+  fTipo:t=>{S.fTipo=t.dataset.v;render()},
+  fSocio:t=>{S.fSocio=t.dataset.v;render()},
+  passados:t=>{S.passados=t.dataset.v==='1';render()},
+  novo:t=>openForm(t.dataset.v,null,t.dataset.def?JSON.parse(t.dataset.def):null),
+  edit:t=>{const[c,id]=t.dataset.v.split(':');openForm(c,id)},
+  avancar:t=>{const a=art(t.dataset.v);if(!a)return;const i=DRAFT_COLS.indexOf(a.status||'Observando');save('artistas',a.id,{status:DRAFT_COLS[Math.min(i+1,DRAFT_COLS.length-1)]}).then(render)},
+  draftar:t=>draftar(t.dataset.v),
+  lancar:t=>lancar(t.dataset.v,t),
+  tab:t=>go(t.dataset.v),
+  artView:t=>{S.artView=t.dataset.v;S.q='';render()},
+  igsync:t=>igSyncBtn(t.dataset.v,t)
+};
+main.addEventListener('click',e=>{
+  if(e.target.closest('a'))return;
+  const t=e.target.closest('[data-prof],[data-ev],[data-open],[data-act]');
+  if(!t||!main.contains(t))return;
+  if(t.dataset.prof)openDetail('artistas',t.dataset.prof);
+  else if(t.dataset.ev)openDetail('eventos',t.dataset.ev);
+  else if(t.dataset.open){const[c,id]=t.dataset.open.split(':');openForm(c,id||null)}
+  else if(t.dataset.act&&ACT[t.dataset.act])ACT[t.dataset.act](t);
+});
+main.addEventListener('input',e=>{if(e.target.id==='qArt'){S.q=e.target.value;elencoGrid()}});
+main.addEventListener('change',e=>{if(e.target.id==='sortArt'){S.sort=e.target.value;elencoGrid()}});
+
+/* ---------- cálculos ---------- */
 function finMonth(m){
   const L=S.data.financeiro.filter(x=>(x.data||'').startsWith(m));
   const ent=L.filter(x=>x.tipo==='Entrada'&&x.status!=='Pendente').reduce((a,x)=>a+(+x.valor||0),0);
@@ -333,94 +671,218 @@ function finMonth(m){
   return {L,ent,sai,res:ent-sai,ret};
 }
 const pend=tipo=>S.data.financeiro.filter(x=>x.tipo===tipo&&x.status==='Pendente');
-const monthNav=()=>`<div class="month"><button type="button" data-m="-1" aria-label="Mês anterior">‹</button><span>${monthLabel(S.month)}</span><button type="button" data-m="1" aria-label="Próximo mês">›</button></div>`;
-function bindMonth(){view.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{S.month=shiftMonth(S.month,+b.dataset.m);render()})}
-function bindOpen(){view.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const[c,id]=b.dataset.open.split(':');openForm(c,id)})}
+const monthNav=()=>`<div class="month"><button type="button" data-act="m" data-v="-1" aria-label="Mês anterior">‹</button><span>${monthLabel(S.month)}</span><button type="button" data-act="m" data-v="1" aria-label="Próximo mês">›</button></div>`;
 function upcoming(){
-  const a=S.data.agenda.map(x=>({c:'agenda',id:x.id,data:x.data,hora:x.hora||'',t:x.titulo,s:[x.tipo,socioName(x.socio),artistaName(x.artista),x.local].filter(Boolean).join(' · '),tag:x.tipo||'Compromisso'}));
-  const e=S.data.eventos.filter(x=>x.data).map(x=>({c:'eventos',id:x.id,data:x.data,hora:'',t:x.nome,s:[x.marca,(x.artistas||[]).map(artistaName).filter(Boolean).join(', '),x.local].filter(Boolean).join(' · '),tag:'Evento',st:x.status}));
-  const m=S.data.marcas.filter(x=>x.proximoData&&!['Fechado','Perdido'].includes(x.status)).map(x=>({c:'marcas',id:x.id,data:x.proximoData,hora:'',t:`${x.marca}: ${x.proximo||'retomar contato'}`,s:[x.contatoNome,socioName(x.socio)].filter(Boolean).join(' · '),tag:'Follow-up'}));
-  return a.concat(e,m).sort((p,q)=>(p.data+p.hora).localeCompare(q.data+q.hora));
+  const a=S.data.agenda.map(x=>({c:'agenda',id:x.id,data:x.data,hora:x.hora||'',t:x.titulo,s:[x.tipo,socioName(x.socio),artistaName(x.artista),x.local].filter(Boolean).join(' · '),tag:x.tipo||'Compromisso',socio:x.socio}));
+  const e=S.data.eventos.filter(x=>x.data).map(x=>({c:'eventos',id:x.id,data:x.data,hora:'',t:x.nome,s:[x.marca,(x.artistas||[]).map(artistaName).filter(Boolean).join(', '),x.local].filter(Boolean).join(' · '),st:x.status,socio:x.socio}));
+  const m=S.data.marcas.filter(x=>x.proximoData&&!['Fechado','Perdido'].includes(x.status)).map(x=>({c:'marcas',id:x.id,data:x.proximoData,hora:'',t:`${x.marca}: ${x.proximo||'retomar contato'}`,s:[x.contatoNome,socioName(x.socio)].filter(Boolean).join(' · '),tag:'Follow-up',socio:x.socio}));
+  return a.concat(e,m).filter(x=>x.data).sort((p,q)=>(p.data+p.hora).localeCompare(q.data+q.hora));
 }
 function dateRow(x,late){
   const d=toDate(x.data);
-  return `<button class="row date" type="button" data-open="${x.c}:${x.id}">
+  const attr=x.c==='eventos'?`data-ev="${x.id}"`:`data-open="${x.c}:${x.id}"`;
+  return `<button class="row date" type="button" ${attr}>
     <div class="d"><b>${d.getDate()}</b><small>${MES[d.getMonth()]} · ${DOW[d.getDay()]}</small></div>
     <div class="t">${x.hora?`<span style="color:var(--mut);font-weight:500">${esc(x.hora)} </span>`:''}${esc(x.t)}</div>
     <div class="s">${esc(x.s)}</div>
-    <div class="r">${late?pill('Atrasado'):x.c==='eventos'?pill(x.st||'Evento'):pill(x.tag,x.c==='marcas'?'p-info':'p-mut')}</div></button>`;
+    <div class="r">${late?pill('Atrasado'):x.c==='eventos'?pill(x.st||'Prospecção'):pill(x.tag,x.c==='marcas'?'p-info':'p-mut')}</div></button>`;
+}
+function ranking(){
+  const tot={};
+  S.data.eventos.filter(e=>fechado(e)&&(e.data||'').startsWith(YEAR)).forEach(e=>{
+    const as=(e.artistas||[]).filter(art);if(!as.length)return;
+    as.forEach(id=>{tot[id]=tot[id]||{v:0,n:0};tot[id].v+=(+e.valor||0)/as.length;tot[id].n++});
+  });
+  return Object.entries(tot).map(([id,o])=>({a:art(id),...o})).sort((p,q)=>q.v-p.v);
 }
 
-/* ---------- Visão geral ---------- */
+/* ---------- Temporada (visão geral) ---------- */
 function vGeral(){
   const f=finMonth(S.month), rec=pend('Entrada'), pag=pend('Saída');
-  const prox=upcoming().filter(x=>x.data>=TODAY).slice(0,6);
-  const atras=upcoming().filter(x=>x.c==='marcas'&&x.data<TODAY);
-  const mk=S.data.marcas, mkAbertas=mk.filter(x=>!['Fechado','Perdido'].includes(x.status));
-  const mkPot=mkAbertas.reduce((a,x)=>a+(+x.potencial||0),0);
+  const up=upcoming();
+  const prox=up.filter(x=>x.data>=TODAY).slice(0,6);
+  const atras=up.filter(x=>x.c==='marcas'&&x.data<TODAY);
+  const elenco=S.data.artistas.filter(a=>a.status==='Ativo');
+  const top=elenco.slice().sort((p,q)=>(ger(q)??-1)-(ger(p)??-1)).slice(0,4);
+  const rk=ranking().slice(0,5), rmax=rk.length?rk[0].v:1;
   const ev=S.data.eventos, tot=ev.length;
   const cont=ST_EVENTO.map(s=>[s,ev.filter(x=>(x.status||'Prospecção')===s).length]);
-  const pipe=ev.filter(x=>['Proposta enviada','Fechado'].includes(x.status)).reduce((a,x)=>a+(+x.valor||0),0);
+  const mk=S.data.marcas, mkAb=mk.filter(x=>!['Fechado','Perdido'].includes(x.status));
+  const prospects=S.data.artistas.filter(a=>DRAFT_COLS.includes(a.status));
   const parte=f.res/3;
-  view.innerHTML=`
+  const ultimos=ev.filter(e=>e.data&&e.data<=TODAY&&['Realizado','Pago'].includes(e.status)).sort((a,b)=>b.data.localeCompare(a.data)).slice(0,3);
+  paint(`
   <div class="bar"><h2>Visão geral</h2>${monthNav()}</div>
+  <p class="sub">Temporada ${YEAR}</p>
   <div class="kpis">
     <div class="kpi"><label>Entrou no mês</label><b class="pos">${money(f.ent)}</b><em>${f.L.filter(x=>x.tipo==='Entrada').length} lançamentos</em></div>
     <div class="kpi"><label>Saiu no mês</label><b class="neg">${money(f.sai)}</b><em>sem retiradas</em></div>
-    <div class="kpi"><label>Resultado</label><b class="${f.res<0?'neg':''}">${money(f.res)}</b><em>entradas − saídas</em></div>
-    <div class="kpi"><label>A receber</label><b>${money(rec.reduce((a,x)=>a+(+x.valor||0),0))}</b><em>${rec.length} pendente${rec.length===1?'':'s'} · a pagar ${money(pag.reduce((a,x)=>a+(+x.valor||0),0))}</em></div>
+    <div class="kpi"><label>Resultado</label><b class="${f.res<0?'neg':''}">${money(f.res)}</b><em>${money(parte)} por sócio</em></div>
+    <div class="kpi"><label>A receber</label><b>${money(rec.reduce((a,x)=>a+(+x.valor||0),0))}</b><em>a pagar ${money(pag.reduce((a,x)=>a+(+x.valor||0),0))}</em></div>
   </div>
-  <h3>Divisão entre sócios · ${monthLabel(S.month)}</h3>
-  <div class="split">${[0,1,2].map(i=>`<div><label>${esc(S.socios[i])}</label><b>${money(parte)}</b><em>retirou ${money(f.ret[i])} · saldo ${money(parte-f.ret[i])}</em></div>`).join('')}</div>
+  <h3>Destaques do elenco</h3>
+  ${top.length?`<div class="cards top4">${top.map(a=>pcard(a)).join('')}</div>`
+    :`<div class="rows">${empty('Elenco vazio','Cadastre artistas na aba Artistas ou drafte alguém do quadro de Draft.')}</div>`}
   <div class="two">
     <div>
       ${atras.length?`<h3 class="late">Follow-ups atrasados · ${atras.length}</h3><div class="rows">${atras.slice(0,5).map(x=>dateRow(x,1)).join('')}</div>`:''}
-      <h3>Próximos compromissos</h3>
-      <div class="rows">${prox.length?prox.map(dateRow).join(''):empty('Nada marcado daqui pra frente','Cadastre na aba Agenda ou dê data a um evento.')}</div>
+      <h3>Próximos jogos</h3>
+      <div class="rows">${prox.length?prox.map(x=>dateRow(x)).join(''):empty('Nada marcado daqui pra frente','Cadastre na Agenda ou dê data a um evento.')}</div>
+      <h3>Artilharia ${YEAR}</h3>
+      <div class="rows">${rk.length?rk.map((r,i)=>`<button class="row withav" type="button" data-prof="${r.a.id}">
+        ${av(r.a.foto,r.a.nome)}
+        <div class="t">${i+1}. ${esc(r.a.nome)}</div>
+        <div class="s"><span style="display:block;height:5px;background:var(--line);border-radius:2px;margin-top:4px"><i style="display:block;height:100%;width:${Math.max(4,r.v/rmax*100)}%;background:var(--acc);border-radius:2px"></i></span></div>
+        <div class="r"><span class="v">${money(r.v)}</span><span style="font-size:12px;color:var(--mut)">${r.n} evento${r.n>1?'s':''}</span></div></button>`).join('')
+        :empty('Sem contratos fechados neste ano','Quando um evento estiver Fechado, Realizado ou Pago, o faturamento entra aqui por artista.')}</div>
     </div>
     <div>
-      <h3>Eventos por status</h3>
+      <h3>Divisão entre sócios · ${monthLabel(S.month)}</h3>
+      <div class="legend">${[0,1,2].map(i=>`<span style="--c:var(--acc)">${esc(S.socios[i])}</span><b>${money(parte-f.ret[i])}</b>`).join('')}</div>
+      <p style="font-size:12px;color:var(--mut);margin:6px 0 0">Saldo de cada um: um terço do resultado menos o que já retirou.</p>
+      <h3>Eventos</h3>
       ${tot?`<div class="funnel">${cont.filter(c=>c[1]).map(([s,n])=>`<i style="width:${n/tot*100}%;background:${FUNNEL_C[s]}" title="${esc(s)}: ${n}"></i>`).join('')}</div>
-      <div class="legend">${cont.map(([s,n])=>`<span style="--c:${FUNNEL_C[s]}">${esc(s)}</span><b>${n}</b>`).join('')}</div>
-      <p style="font-size:13px;color:var(--mut);margin-top:14px">Em negociação e fechados: <b style="color:var(--fg)">${money(pipe)}</b></p>`
-      :`<div class="rows">${empty('Nenhum evento ainda','Cadastre na aba Eventos.')}</div>`}
+      <div class="legend">${cont.map(([s,n])=>`<span style="--c:${FUNNEL_C[s]}">${esc(s)}</span><b>${n}</b>`).join('')}</div>`
+      :`<p class="sub" style="margin:0">Nenhum evento ainda.</p>`}
       <h3>Marcas</h3>
-      ${mk.length?`<div class="funnel">${ST_MARCA.map(s=>[s,mk.filter(x=>(x.status||'A prospectar')===s).length]).filter(c=>c[1]).map(([s,n])=>`<i style="width:${n/mk.length*100}%;background:${MARCA_C[s]}" title="${esc(s)}: ${n}"></i>`).join('')}</div>
+      ${mk.length?`<div class="funnel">${ST_MARCA.map(s=>[s,mk.filter(x=>(x.status||'A prospectar')===s).length]).filter(c=>c[1]).map(([s,n])=>`<i style="width:${n/mk.length*100}%;background:${MARCA_C[s]}"></i>`).join('')}</div>
       <div class="legend">${ST_MARCA.map(s=>`<span style="--c:${MARCA_C[s]}">${esc(s)}</span><b>${mk.filter(x=>(x.status||'A prospectar')===s).length}</b>`).join('')}</div>
-      <p style="font-size:13px;color:var(--mut);margin-top:14px">Potencial em aberto: <b style="color:var(--fg)">${money(mkPot)}</b></p>`:`<div class="rows">${empty('Nenhuma marca no funil','Cadastre na aba Marcas.')}</div>`}
+      <p style="font-size:13px;color:var(--mut);margin-top:12px">Potencial em aberto: <b style="color:var(--fg)">${money(mkAb.reduce((a,x)=>a+(+x.potencial||0),0))}</b></p>`:`<p class="sub" style="margin:0">Nenhuma marca no funil.</p>`}
       <h3>Artistas</h3>
-      <div class="legend">${['Ativo','Em negociação','Pausado'].map(s=>`<span style="--c:var(${s==='Ativo'?'--pos':s==='Pausado'?'--mut':'--acc'})">${s}</span><b>${S.data.artistas.filter(a=>(a.status||'Ativo')===s).length}</b>`).join('')}</div>
+      <div class="legend"><span style="--c:var(--pos)">No elenco</span><b>${elenco.length}</b><span style="--c:var(--acc)">No radar do Draft</span><b>${prospects.length}</b><span style="--c:var(--mut)">Pausados</span><b>${S.data.artistas.filter(a=>a.status==='Pausado').length}</b></div>
     </div>
-  </div>`;
-  bindMonth();bindOpen();
+  </div>
+  ${ultimos.length?`<h3>Últimos eventos</h3><div class="evgrid">${ultimos.map(ecard).join('')}</div>`:''}`);
 }
 
-/* ---------- Artistas ---------- */
-function vArtistas(){
-  view.innerHTML=`<div class="bar"><h2>Artistas</h2><button class="add" type="button" id="novo">+ Artista</button></div>
-  <input class="search" id="qArt" type="search" placeholder="Buscar por nome, @ ou segmento" value="${esc(S.q)}">
-  <div class="chips" id="chipsArt">${['','Ativo','Em negociação','Pausado'].map(s=>`<button class="chip" type="button" data-s="${s}" aria-pressed="${S.fStatus===s}">${s||'Todos'}</button>`).join('')}</div>
-  <div class="rows" id="listArt"></div>`;
-  document.getElementById('novo').onclick=()=>openForm('artistas');
-  const q=document.getElementById('qArt');
-  q.oninput=()=>{S.q=q.value;listArt()};
-  document.getElementById('chipsArt').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.fStatus=b.dataset.s;vArtistas()};
-  listArt();
+/* ---------- Elenco ---------- */
+function vElenco(){
+  const elenco=S.data.artistas.filter(a=>a.status==='Ativo'||!a.status);
+  const nichos=[...new Set(elenco.map(a=>(a.segmento||'').trim()).filter(Boolean))].sort();
+  const gs=elenco.map(ger).filter(x=>x!=null);
+  const tiers={};elenco.forEach(a=>{const t=tier(ger(a));if(t!=='none')tiers[t]=(tiers[t]||0)+1});
+  paint(`<div class="bar"><h2>Artistas</h2><button class="add" type="button" data-act="novo" data-v="artistas" data-def="${esc(JSON.stringify({status:'Ativo'}))}">+ Artista</button></div>
+  ${artSeg()}
+  <p class="sub">${elenco.length} no elenco${gs.length?` · GER médio ${Math.round(gs.reduce((a,b)=>a+b,0)/gs.length)}`:''}${['elite','ouro','prata','bronze'].filter(t=>tiers[t]).map(t=>` · ${tiers[t]} ${TIER_N[t]}`).join('')}</p>
+  <div class="tools"><input class="search" id="qArt" type="search" placeholder="Buscar por nome, @ ou nicho" value="${esc(S.q)}" aria-label="Buscar artista">
+    <select class="sel" id="sortArt" aria-label="Ordenar"><option value="ger"${S.sort==='ger'?' selected':''}>Maior GER</option><option value="pot"${S.sort==='pot'?' selected':''}>Maior potencial</option><option value="valor"${S.sort==='valor'?' selected':''}>Maior valor</option><option value="nome"${S.sort==='nome'?' selected':''}>Nome</option></select></div>
+  <div class="chips"><button class="chip" type="button" data-act="nicho" data-v="" aria-pressed="${!S.fNicho&&!S.pausados}">Todos</button>${nichos.map(n=>`<button class="chip" type="button" data-act="nicho" data-v="${esc(n)}" aria-pressed="${S.fNicho===n}">${esc(n)}</button>`).join('')}<button class="chip" type="button" data-act="pausados" aria-pressed="${S.pausados}">Pausados</button></div>
+  <div id="grid"></div>`);
+  elencoGrid();
 }
-function listArt(){
+function elencoGrid(){
+  const el=document.getElementById('grid');if(!el)return;
   const q=S.q.trim().toLowerCase();
-  const L=S.data.artistas.filter(a=>(!S.fStatus||(a.status||'Ativo')===S.fStatus)&&(!q||[a.nome,a.insta,a.segmento].join(' ').toLowerCase().includes(q))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-  const el=document.getElementById('listArt');
-  el.innerHTML=L.length?L.map(a=>{
-    const evs=S.data.eventos.filter(e=>(e.artistas||[]).includes(a.id)).length;
-    const vence=a.contratoAte&&a.contratoAte<=addDays(TODAY,30);
-    const preco=a.reels?`${money(a.reels)} <span style="color:var(--mut);font-weight:400">Reels</span>`:a.cache?`${money(a.cache)} <span style="color:var(--mut);font-weight:400">presença</span>`:'';
-    return `<div class="row st">
-      <div class="t"><button class="open" type="button" data-open="artistas:${a.id}">${esc(a.nome)}</button> ${igLink(a.insta)}</div>
-      <div class="s">${esc([a.seguidores?compact.format(a.seguidores)+' seguidores':'',a.engaj?num(a.engaj)+'% eng.':'',a.segmento,a.cidade,socioName(a.socio)&&'resp. '+socioName(a.socio),evs?evs+' evento'+(evs>1?'s':''):''].filter(Boolean).join(' · ')||'—')}</div>
-      <div class="r">${preco?`<span class="v">${preco}</span>`:''}${vence?pill('Contrato vence'):pill(a.status||'Ativo')}</div></div>`}).join('')
-    :empty(S.data.artistas.length?'Ninguém com esse filtro':'Nenhum artista cadastrado','Toque em + Artista para adicionar o primeiro.');
-  el.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{const[c,id]=b.dataset.open.split(':');openForm(c,id)});
+  let L=S.data.artistas.filter(a=>S.pausados?a.status==='Pausado':(a.status==='Ativo'||!a.status))
+    .filter(a=>!S.fNicho||(a.segmento||'').trim()===S.fNicho)
+    .filter(a=>!q||[a.nome,a.insta,a.tiktok,a.segmento,a.cidade].join(' ').toLowerCase().includes(q));
+  const k={ger:a=>-(ger(a)??-1),pot:a=>-(+a.pot||0),valor:a=>-(+a.reels||+a.cache||0)}[S.sort];
+  L.sort((a,b)=>k?(k(a)-k(b))||(a.nome||'').localeCompare(b.nome||''):(a.nome||'').localeCompare(b.nome||''));
+  el.innerHTML=L.length?`<div class="cards">${L.map(a=>pcard(a)).join('')}</div>`
+    :`<div class="rows">${empty(S.data.artistas.length?'Ninguém com esse filtro':'Elenco vazio','Toque em + Artista para criar a primeira carta.')}</div>`;
+}
+
+/* ---------- Draft (dentro de Artistas) ---------- */
+function artSeg(){
+  const e=S.data.artistas.filter(a=>a.status==='Ativo'||!a.status).length,d=S.data.artistas.filter(a=>DRAFT_COLS.includes(a.status)).length;
+  return `<div class="seg" role="group" aria-label="Visão"><button type="button" data-act="artView" data-v="elenco" aria-pressed="${S.artView!=='draft'}">Elenco · ${e}</button><button type="button" data-act="artView" data-v="draft" aria-pressed="${S.artView==='draft'}">Draft · ${d}</button></div>`;
+}
+function vDraft(){
+  const P=S.data.artistas.filter(a=>DRAFT_COLS.includes(a.status));
+  paint(`<div class="bar"><h2>Artistas</h2><button class="add" type="button" data-act="novo" data-v="artistas" data-def="${esc(JSON.stringify({status:'Observando'}))}">+ Observar artista</button></div>
+  ${artSeg()}
+  <p class="sub">Os artistas no radar da DRAFT. Avance cada um conforme a conversa anda. Quando fechar contrato, toque em Draftar e ele entra no elenco.</p>
+  <div class="board">${DRAFT_COLS.map((col,ci)=>{const L=P.filter(a=>a.status===col).sort((a,b)=>(+b.pot||0)-(+a.pot||0)||(ger(b)??0)-(ger(a)??0));
+    return `<section class="col"><h4>${esc(col)} <span>${L.length}</span></h4>${L.length?L.map(a=>{const g=ger(a);return `<div class="pros">
+      ${av(a.foto,a.nome,'lg')}
+      <div class="nm"><button class="open" type="button" data-prof="${a.id}">${esc(a.nome)}</button></div>
+      <div class="meta">${esc([a.segmento,a.seguidores?compact.format(a.seguidores)+' seg.':'',a.engaj?num(a.engaj)+'% eng.':''].filter(Boolean).join(' · ')||'Sem números ainda')}</div>
+      <div class="rt">${g!=null?`<span class="badge g">GER ${g}</span>`:''}${a.pot?`<span class="badge">POT ${+a.pot}</span>`:''}${igLink(a.insta)}</div>
+      <div class="go">${ci<DRAFT_COLS.length-1?`<button class="btn2" type="button" data-act="avancar" data-v="${a.id}">Avançar →</button>`:''}<button class="${ci===DRAFT_COLS.length-1?'add':'btn2'}" type="button" data-act="draftar" data-v="${a.id}">Draftar</button></div>
+    </div>`}).join(''):`<div class="colempty">${ci===0?'Ninguém sendo observado. Use + Observar artista.':'Vazio.'}</div>`}</section>`}).join('')}</div>`);
+}
+let fxT=null;
+async function draftar(id){
+  const a=art(id);if(!a)return;
+  await save('artistas',id,{status:'Ativo',draftadoEm:TODAY});
+  S.artView='elenco';
+  const fx=$('#fx');
+  fx.innerHTML=`<div class="in">${pcard(art(id)||a,{noclick:1})}<p class="ft">Draftado</p><p class="fs">${esc(a.nome)} entra no elenco da DRAFT · Temporada ${YEAR}</p></div>`;
+  fx.hidden=false;clearTimeout(fxT);fxT=setTimeout(()=>{fx.hidden=true},2800);
+  render();
+}
+$('#fx').addEventListener('click',()=>{$('#fx').hidden=true});
+
+/* ---------- Ficha do artista ---------- */
+function vPerfil(a){
+  const at=attrs(a),g=ger(a),t=tier(g),pot=+a.pot||0;
+  const evs=evsOf(a.id).sort((p,q)=>(q.data||'').localeCompare(p.data||''));
+  const fat=evs.filter(fechado).reduce((s,e)=>s+(+e.valor||0)/Math.max(1,(e.artistas||[]).length),0);
+  const views=evs.reduce((s,e)=>s+(+e.resViews||0),0);
+  const vence=a.contratoAte&&a.contratoAte<=addDays(TODAY,30);
+  const com=(+a.reels||0)*(+a.comissao||0)/100;
+  const h=Array.isArray(a.historico)?a.historico:[];
+  const inDraft=DRAFT_COLS.includes(a.status);
+  const top=`<button class="back" type="button" data-act="back">‹ Voltar</button>
+  <div class="prof">${a.foto?`<div class="prof-bg" style="--ph:url('${a.foto}')"></div>`:''}
+    ${pcard(a,{big:1,noclick:1})}
+    <div class="prof-info">
+      <div class="eyebrow">${esc([a.segmento,a.cidade].filter(Boolean).join(' · ')||'Artista')}</div>
+      <h1>${esc(a.nome)}</h1>
+      <div class="linkrow">${igLink(a.insta,a.insta?'Instagram @'+esc(handle(a.insta))+' ↗':'')}${ttLink(a.tiktok,a.tiktok?'TikTok @'+esc(handle(a.tiktok))+' ↗':'')}</div>
+      <div class="pillrow">${pill(a.status||'Ativo')}${g!=null?pill('Carta '+TIER_N[t],'p-acc'):''}${vence?pill('Contrato vence'):''}${a.exclusivo&&a.exclusivo!=='Não'?pill('Exclusivo','p-info'):''}</div>
+      ${g!=null||pot?`<div class="gp"><div class="lbl"><span>Geral <b>${g??'–'}</b></span><span>${pot&&g!=null&&pot>g?`pode crescer +${pot-g}`:''}</span><span>Potencial <b>${pot||'–'}</b></span></div>
+        <div class="trk">${pot?`<i class="p" style="width:${pot}%"></i>`:''}<i class="g" style="width:${g||0}%"></i></div></div>`:''}
+      ${a.igSyncEm?`<div class="hint">Dados do Instagram de ${esc(dFull(a.igSyncEm.slice(0,10)))}</div>`:''}
+      <div class="acts"><button class="add" type="button" data-act="edit" data-v="artistas:${a.id}">Editar ficha</button>${IG&&a.insta?`<button class="btn2" type="button" data-act="igsync" data-v="${a.id}">Atualizar do Instagram</button>`:''}${inDraft?`<button class="btn2" type="button" data-act="draftar" data-v="${a.id}">Draftar para o elenco</button>`:''}</div>
+    </div>
+  </div>
+  <h3>Atributos</h3>
+  <div class="attrs">${Object.entries(at).map(([k,v])=>`<div class="at ${band(v)}"><abbr title="${ATTR_N[k]}">${k}</abbr><div class="bx"><small>${ATTR_N[k]}</small><span><i style="width:${v||0}%"></i></span></div><b>${v??'–'}</b></div>`).join('')}</div>
+  ${h.length>1?`<h3>Evolução do GER</h3><div class="spark">${spark(h)}</div>`:''}`;
+  const bottom=`
+  <h3>Valor de mercado</h3>
+  <div class="stats">
+    <div><label>Reels</label><b>${a.reels?money(a.reels):'–'}</b>${com?`<em>DRAFT fica com ${money(com)}</em>`:''}</div>
+    <div><label>Stories</label><b>${a.stories?money(a.stories):'–'}</b></div>
+    <div><label>Presença em evento</label><b>${a.cache?money(a.cache):'–'}</b></div>
+    <div><label>Comissão</label><b>${a.comissao?num(a.comissao)+'%':'–'}</b></div>
+  </div>
+  <h3>Carreira na DRAFT</h3>
+  <div class="stats">
+    <div><label>Eventos</label><b>${evs.length}</b><em>${evs.filter(e=>['Realizado','Pago'].includes(e.status)).length} realizados</em></div>
+    <div><label>Faturamento gerado</label><b>${money(fat)}</b><em>contratos fechados</em></div>
+    <div><label>Views em campanhas</label><b>${views?compact.format(views):'–'}</b></div>
+    <div><label>Seguidores</label><b>${a.seguidores?compact.format(a.seguidores):'–'}</b><em>${a.engaj?num(a.engaj)+'% de engajamento':''}</em></div>
+  </div>
+  ${evs.length?`<div class="rows" style="margin-top:12px">${evs.map(e=>`<button class="row withav" type="button" data-ev="${e.id}">${av(e.capa,e.marca||e.nome)}<div class="t">${esc(e.nome)}</div><div class="s">${esc([e.marca,dShort(e.data)].filter(Boolean).join(' · '))}</div><div class="r">${pill(e.status||'Prospecção')}</div></button>`).join('')}</div>`:''}
+  <h3>Contrato e contato</h3>
+  <dl class="dl">
+    <dt>Situação</dt><dd>${esc(stLabel(a.status||'Ativo'))}${a.draftadoEm?' · draftado em '+esc(dFull(a.draftadoEm)):''}</dd>
+    <dt>Contrato até</dt><dd class="${vence?'neg':''}">${a.contratoAte?esc(dFull(a.contratoAte)):'–'}</dd>
+    <dt>Exclusividade</dt><dd>${esc(a.exclusivo||'–')}</dd>
+    <dt>Sócio responsável</dt><dd>${esc(socioName(a.socio)||'–')}</dd>
+    <dt>Contato</dt><dd>${esc(a.contato||'–')}</dd>
+  </dl>
+  ${a.obs?`<h3>Observações</h3><p class="txt">${esc(a.obs)}</p>`:''}`;
+  paint(top,media(a.destaques,'Destaques'),bottom);
+}
+function spark(h){
+  const sm=window.innerWidth<600,W=sm?420:1000,H=sm?120:150,L=12,R=16,T=22,B=24;
+  const vs=h.map(p=>p.o),mn=Math.max(0,Math.min(...vs)-6),mx=Math.min(99,Math.max(...vs)+6);
+  const x=i=>L+(W-L-R)*(h.length===1?0.5:i/(h.length-1)), y=v=>T+(H-T-B)*(1-(v-mn)/Math.max(1,mx-mn));
+  const pts=h.map((p,i)=>[x(i),y(p.o)]);
+  const area=`M${pts[0][0]},${H-B} `+pts.map(p=>`L${p[0]},${p[1]}`).join(' ')+` L${pts[pts.length-1][0]},${H-B} Z`;
+  const last=h[h.length-1],first=h[0];
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolução do geral de ${first.o} para ${last.o}">
+    <line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="var(--line)"/>
+    <path d="${area}" fill="var(--acc)" opacity=".12"/>
+    <polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--acc)" stroke-width="2"/>
+    ${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===pts.length-1?5:2.5}" fill="${i===pts.length-1?'var(--acc)':'var(--fg)'}"><title>${esc(dFull(h[i].d))}: ${h[i].o}</title></circle>`).join('')}
+    <text x="${pts[pts.length-1][0]}" y="${pts[pts.length-1][1]-10}" text-anchor="end" font-size="14" font-weight="700" fill="var(--fg)">${last.o}</text>
+    <text x="${L}" y="${H-6}" font-size="11" fill="var(--mut)">${esc(dFull(first.d))}</text>
+    <text x="${W-R}" y="${H-6}" font-size="11" fill="var(--mut)" text-anchor="end">${esc(dFull(last.d))}</text>
+  </svg>`;
 }
 
 /* ---------- Marcas ---------- */
@@ -428,96 +890,90 @@ function vMarcas(){
   const L=S.data.marcas.filter(m=>!S.fStatus||(m.status||'A prospectar')===S.fStatus)
     .sort((a,b)=>(a.proximoData||'9999').localeCompare(b.proximoData||'9999')||(a.marca||'').localeCompare(b.marca||''));
   const ab=L.filter(x=>!['Fechado','Perdido'].includes(x.status));
-  view.innerHTML=`<div class="bar"><h2>Marcas</h2><button class="add" type="button" id="novo">+ Marca</button></div>
-  <div class="chips" id="chipsMk">${['',...ST_MARCA].map(s=>`<button class="chip" type="button" data-s="${s}" aria-pressed="${S.fStatus===s}">${s||'Todas'}</button>`).join('')}</div>
-  ${L.length?`<p style="font-size:13px;color:var(--mut);margin:0 0 10px">${L.length} marca${L.length>1?'s':''} · ${ab.length} em aberto · potencial ${money(ab.reduce((a,x)=>a+(+x.potencial||0),0))}</p>`:''}
+  paint(`<div class="bar"><h2>Marcas</h2><button class="add" type="button" data-act="novo" data-v="marcas">+ Marca</button></div>
+  <div class="chips">${['',...ST_MARCA].map(s=>`<button class="chip" type="button" data-act="fStatus" data-v="${s}" aria-pressed="${S.fStatus===s}">${s||'Todas'}</button>`).join('')}</div>
+  ${L.length?`<p class="sub" style="margin:0 0 10px">${L.length} marca${L.length>1?'s':''} · ${ab.length} em aberto · potencial ${money(ab.reduce((a,x)=>a+(+x.potencial||0),0))}</p>`:''}
   <div class="rows">${L.length?L.map(m=>{const late=m.proximoData&&m.proximoData<TODAY&&!['Fechado','Perdido'].includes(m.status);
     const prox=m.proximo||m.proximoData?`<span class="${late?'late':''}">Próximo: ${esc(m.proximo||'retomar contato')}${m.proximoData?' · '+esc(dShort(m.proximoData)):''}</span>`:'';
-    return `<div class="row st">
+    return `<div class="row st withav">
+    ${av(m.logo,m.marca,m.logo?'logo':'')}
     <div class="t"><button class="open" type="button" data-open="marcas:${m.id}">${esc(m.marca)}</button> ${igLink(m.insta)}</div>
     <div class="s">${esc([m.grupo,m.segmento,[m.contatoNome,m.cargo].filter(Boolean).join(', ')].filter(Boolean).join(' · '))}${prox?'<br>'+prox:''}</div>
     <div class="r">${m.potencial?`<span class="v">${money(m.potencial)}</span>`:''}${pill(m.status||'A prospectar')}</div></div>`}).join('')
-    :empty('Nenhuma marca nessa etapa','Cadastre a marca, quem é o contato e qual o próximo passo.')}</div>`;
-  document.getElementById('novo').onclick=()=>openForm('marcas');
-  document.getElementById('chipsMk').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.fStatus=b.dataset.s;vMarcas()};
-  bindOpen();
+    :empty('Nenhuma marca nessa etapa','Cadastre a marca, quem é o contato e qual o próximo passo.')}</div>`);
 }
 
-/* ---------- Dicas ---------- */
-const DICAS=[
- {h:'Captar marcas',p:'O que mais funciona para uma agência pequena entrar em marca grande.',l:[
-  ['Comece por quem já aparece no conteúdo','Se a Amstel já aparece nos Reels dos seus artistas, esse vídeo e as views dele viram o primeiro case. Mostre para a marca o alcance que ela teve sem pagar nada.'],
-  ['Fale com quem compra, não com o SAC','Em Heineken, Ambev ou Coca-Cola quem decide é o marketing de marca, o trade marketing regional ou a agência de influência que atende a conta. No LinkedIn, busque "brand manager", "trade marketing Rio" ou "influência" junto com o nome da marca.'],
-  ['Venda também para as agências das marcas','Muitas marcas grandes contratam criadores por meio de agências e plataformas de influência. Se apresentar como fornecedor de talentos para elas é um atalho para campanhas grandes.'],
-  ['Leve a proposta pronta','Em vez de perguntar se a marca tem interesse, mande algo como: 3 criadores de futebol carioca, 85 mil seguidores somados, 5% de engajamento, 1 Reels collab + Stories ao vivo em dia de jogo, por R$ X.'],
-  ['Use o calendário das marcas','Campanhas são planejadas por data: Carnaval, Copa, Dia dos Pais, Black Friday, verão. Aborde de 60 a 90 dias antes.'],
-  ['Feche primeiro com marcas locais','Bares, hamburguerias, casas de show e distribuidoras fecham mais rápido e geram os números que abrem porta nas grandes.'],
-  ['Follow-up com data marcada','Quase ninguém responde ao primeiro contato. Faça 3 contatos em 2 semanas, cada um trazendo algo novo (um número, um vídeo, uma data), e registre o próximo passo na aba Marcas.']]},
- {h:'Captar artistas',p:'Quem entra no casting define o que a DRAFT consegue vender.',l:[
-  ['Engajamento vale mais que seguidores','Um perfil de 30 mil com 6% de engajamento costuma vender melhor que um de 300 mil com 0,5%. Conta: média de (curtidas + comentários) dos últimos 10 posts ÷ seguidores × 100.'],
-  ['Escolha nichos que as marcas compram','Futebol, humor carioca, pagode, funk, gastronomia, vida noturna. A marca compra o público do artista.'],
-  ['Confira se a audiência é real','Comentários de gente de verdade, views dos Reels compatíveis com o número de seguidores e crescimento sem saltos estranhos.'],
-  ['Ofereça o que o artista não tem','Negociação, contrato, cobrança, roteiro e edição. É isso que justifica a comissão.'],
-  ['Contrato simples desde o primeiro dia','Comissão (agências costumam ficar entre 20% e 30%), prazo, exclusividade por segmento (não fechar com outra cerveja, por exemplo) e quem recebe da marca e em quantos dias repassa.'],
-  ['Procure onde eles já estão','Eventos, rodas de samba, torcidas e indicações dos artistas que você já tem.']]},
- {h:'Mídia kit',p:'O PDF de uma página que vai em todo primeiro contato.',l:[
-  ['Quem é e qual o nicho','Uma linha, com foto boa.'],
-  ['Números','Seguidores, views médias dos Reels e engajamento. Atualize todo mês.'],
-  ['Público','Idade, cidade e gênero, tirados do Instagram Insights do artista.'],
-  ['Cases','Dois ou três trabalhos com resultado: views, comentários, cupons usados.'],
-  ['Formatos e preços','Reels, Stories, presença em evento e pacote. Deixe um pacote como opção mais vantajosa.']]},
- {h:'Precificação',p:'Um jeito usado no mercado é cobrar por mil visualizações (CPM) e ajustar pelo nicho e pela exclusividade.',l:[
-  ['Exemplo','Reels com média de 40 mil views × R$ 30 a R$ 60 por mil = de R$ 1.200 a R$ 2.400.'],
-  ['Pacote','Reels + 3 Stories costuma sair 15% a 25% mais barato que somar as peças separadas, e fecha mais fácil.'],
-  ['Exclusividade e uso de imagem','Cobre à parte. Se a marca quer usar o vídeo em anúncio pago ou impedir o artista de trabalhar com concorrente, isso tem preço.']]}
-];
-const REFS=[
- ['Mynd e Play9','Juntam gestão de talentos e venda para marcas no mesmo lugar, o mesmo modelo da DRAFT. Vale copiar: casting organizado por nicho, mídia kit sempre atualizado e um responsável por cada marca.'],
- ['Heineken e Ambev','Planejam verba por ano e por data. O que entra fora do plano costuma vir de trade marketing regional e ativações em eventos.'],
- ['Relatório pós-campanha','Agências grandes mandam números até 7 dias depois da entrega: views, alcance, comentários, prints. É o que faz a marca renovar.'],
- ['Um dono por conta','Cada marca tem um sócio responsável. Use o campo Sócio responsável nas abas Marcas e Eventos.']
-];
-function vDicas(){
-  view.innerHTML=`<div class="bar"><h2>Dicas</h2></div><div class="tips">
-  ${DICAS.map(d=>`<section class="tip"><h3>${esc(d.h)}</h3><p>${esc(d.p)}</p><ul>${d.l.map(([b,t])=>`<li><b>${esc(b)}</b><span>${esc(t)}</span></li>`).join('')}</ul></section>`).join('')}
-  <section class="tip"><h3>Como as grandes fazem</h3><div class="ref">${REFS.map(([b,t])=>`<div><b>${esc(b)}</b><small>${esc(t)}</small></div>`).join('')}</div></section>
-  </div>`;
+/* ---------- Eventos ---------- */
+function ecard(e){
+  const as=(e.artistas||[]).map(art).filter(Boolean);
+  return `<button type="button" class="ecard" data-ev="${e.id}">
+    <span class="ec-img">${e.capa?`<img src="${e.capa}" alt="" loading="lazy">`:`<span class="mono">${esc(initials(e.marca||e.nome))}</span>`}${pill(e.status||'Prospecção')}</span>
+    <span class="ec-body"><b>${esc(e.nome)}</b><small>${esc([e.marca,dShort(e.data)].filter(Boolean).join(' · ')||'Sem data')}</small>
+      <span class="ec-foot"><span class="ec-num">${e.valor?`<span>${money(e.valor)}</span>`:''}${e.resViews?`<span style="color:var(--mut)">${compact.format(e.resViews)} views</span>`:''}</span>
+      ${as.length?`<span class="stack">${as.slice(0,4).map(a=>av(a.foto,a.nome,'sm')).join('')}</span>`:''}</span></span>
+  </button>`;
+}
+function vEventos(){
+  const L=S.data.eventos.filter(e=>!S.fStatus||!ST_EVENTO.includes(S.fStatus)||(e.status||'Prospecção')===S.fStatus)
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  const tv=L.reduce((a,e)=>a+(+e.valor||0),0), tc=L.reduce((a,e)=>a+(+e.custo||0),0);
+  paint(`<div class="bar"><h2>Eventos</h2><button class="add" type="button" data-act="novo" data-v="eventos">+ Evento</button></div>
+  <div class="chips">${['',...ST_EVENTO].map(s=>`<button class="chip" type="button" data-act="fStatus" data-v="${s}" aria-pressed="${(ST_EVENTO.includes(S.fStatus)?S.fStatus:'')===s}">${s||'Todos'}</button>`).join('')}</div>
+  ${L.length?`<p class="sub" style="margin:0 0 14px">${L.length} evento${L.length>1?'s':''} · contratos ${money(tv)} · custos ${money(tc)} · margem <b style="color:var(--fg)">${money(tv-tc)}</b></p>`:''}
+  ${L.length?`<div class="evgrid">${L.map(ecard).join('')}</div>`:`<div class="rows">${empty('Nenhum evento nesse filtro','Cadastre a ação, a marca, os artistas e uma foto de capa.')}</div>`}`);
+}
+function vEvento(e){
+  const as=(e.artistas||[]).map(art).filter(Boolean);
+  const m=(+e.valor||0)-(+e.custo||0);
+  const n=S.data.financeiro.filter(x=>x.evento===e.id).length;
+  const cpm=e.valor&&e.resViews?(+e.valor)/(+e.resViews)*1000:0;
+  const taxa=e.resInter&&e.resAlcance?(+e.resInter)/(+e.resAlcance)*100:0;
+  const top=`<button class="back" type="button" data-act="back">‹ Voltar</button>
+  <div class="ev-hero">${e.capa?`<img src="${e.capa}" alt="">`:`<span class="mono">${esc(initials(e.marca||e.nome))}</span>`}
+    <div class="htxt">${pill(e.status||'Prospecção')}<h1>${esc(e.nome)}</h1><p>${esc([e.marca,dFull(e.data),e.local].filter(Boolean).join(' · '))}</p></div></div>
+  <div class="acts" style="margin-top:14px"><button class="add" type="button" data-act="edit" data-v="eventos:${e.id}">Editar evento</button>
+    <button class="btn2" type="button" data-act="lancar" data-v="${e.id}"${n?' disabled':''}>${n?`Já lançado no financeiro (${n})`:'Lançar no financeiro'}</button></div>
+  <h3>Dinheiro</h3>
+  <div class="stats">
+    <div><label>Contrato</label><b>${money(e.valor)}</b><em>${e.vencimento?'marca paga em '+esc(dShort(e.vencimento)):''}</em></div>
+    <div><label>Cachês e custos</label><b class="neg">${money(e.custo)}</b></div>
+    <div><label>Margem DRAFT</label><b class="${m<0?'neg':'pos'}">${money(m)}</b><em>${e.valor?Math.round(m/(+e.valor)*100)+'% do contrato':''}</em></div>
+    <div><label>Sócio responsável</label><b style="font-size:19px">${esc(socioName(e.socio)||'–')}</b></div>
+  </div>
+  ${e.resViews||e.resAlcance||e.resInter?`<h3>Resultado da campanha</h3>
+  <div class="stats">
+    <div><label>Views</label><b>${e.resViews?compact.format(e.resViews):'–'}</b></div>
+    <div><label>Contas alcançadas</label><b>${e.resAlcance?compact.format(e.resAlcance):'–'}</b></div>
+    <div><label>Interações</label><b>${e.resInter?compact.format(e.resInter):'–'}</b><em>${taxa?num(taxa)+'% do alcance':''}</em></div>
+    <div><label>Custo por mil views</label><b>${cpm?money(cpm):'–'}</b><em>para a marca</em></div>
+  </div>`:''}
+  ${as.length?`<h3>Escalação</h3><div class="artchips">${as.map(a=>`<button type="button" class="artchip" data-prof="${a.id}">${av(a.foto,a.nome,'sm')}${esc(a.nome)}${ger(a)!=null?` <span style="color:var(--mut);font-weight:500">${ger(a)}</span>`:''}</button>`).join('')}</div>`:''}
+  ${e.entregas?`<h3>Entregas combinadas</h3><p class="txt">${esc(e.entregas)}</p>`:''}`;
+  const bottom=e.obs?`<h3>Observações</h3><p class="txt">${esc(e.obs)}</p>`:'';
+  paint(top,media(e.links,'Fotos e vídeos'),bottom);
+}
+async function lancar(id,btn){
+  const c=S.data.eventos.find(x=>x.id===id);if(!c)return;
+  if(!c.valor&&!c.custo){toast('Preencha o valor do contrato ou os custos antes de lançar.');return}
+  btn.disabled=true;btn.textContent='Lançando…';
+  if(c.valor)await save('financeiro',newId('financeiro'),{desc:'Contrato: '+c.nome+(c.marca?' ('+c.marca+')':''),tipo:'Entrada',valor:c.valor,data:c.vencimento||c.data||TODAY,status:'Pendente',categoria:'Contrato',socio:c.socio||'',evento:id});
+  if(c.custo)await save('financeiro',newId('financeiro'),{desc:'Cachês: '+c.nome,tipo:'Saída',valor:c.custo,data:c.data||c.vencimento||TODAY,status:'Pendente',categoria:'Cachê artista',socio:c.socio||'',evento:id});
+  toast('Lançado no financeiro como pendente.');render();
 }
 
 /* ---------- Agenda ---------- */
 function vAgenda(){
   let L=upcoming().filter(x=>S.passados?x.data<TODAY:x.data>=TODAY);
-  if(S.fSocio!==''){L=L.filter(x=>{const src=S.data[x.c].find(y=>y.id===x.id);return String(src?.socio)===S.fSocio})}
+  if(S.fSocio!=='')L=L.filter(x=>String(x.socio)===S.fSocio);
   if(S.passados)L.reverse();
-  view.innerHTML=`<div class="bar"><h2>Agenda</h2><button class="add" type="button" id="novo">+ Compromisso</button></div>
-  <div class="chips" id="chipsAg">
-    <button class="chip" type="button" data-p="0" aria-pressed="${!S.passados}">Próximos</button>
-    <button class="chip" type="button" data-p="1" aria-pressed="${S.passados}">Anteriores</button>
+  paint(`<div class="bar"><h2>Agenda</h2><button class="add" type="button" data-act="novo" data-v="agenda">+ Compromisso</button></div>
+  <div class="chips">
+    <button class="chip" type="button" data-act="passados" data-v="0" aria-pressed="${!S.passados}">Próximos</button>
+    <button class="chip" type="button" data-act="passados" data-v="1" aria-pressed="${S.passados}">Anteriores</button>
     <span style="width:8px"></span>
-    ${['',0,1,2].map(i=>`<button class="chip" type="button" data-so="${i}" aria-pressed="${S.fSocio===String(i)}">${i===''?'Todos':esc(S.socios[i])}</button>`).join('')}
+    ${['',0,1,2].map(i=>`<button class="chip" type="button" data-act="fSocio" data-v="${i}" aria-pressed="${S.fSocio===String(i)}">${i===''?'Todos':esc(S.socios[i])}</button>`).join('')}
   </div>
-  <div class="rows">${L.length?L.map(dateRow).join(''):empty(S.passados?'Sem compromissos anteriores':'Agenda livre','Eventos com data aparecem aqui junto com os compromissos.')}</div>`;
-  document.getElementById('novo').onclick=()=>openForm('agenda');
-  document.getElementById('chipsAg').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.p!=null)S.passados=b.dataset.p==='1';if(b.dataset.so!=null)S.fSocio=b.dataset.so;vAgenda()};
-  bindOpen();
-}
-
-/* ---------- Eventos ---------- */
-function vEventos(){
-  const L=S.data.eventos.filter(e=>!S.fStatus||!ST_EVENTO.includes(S.fStatus)||(e.status||'Prospecção')===S.fStatus)
-    .sort((a,b)=>(b.data||'').localeCompare(a.data||''));
-  const tv=L.reduce((a,e)=>a+(+e.valor||0),0), tc=L.reduce((a,e)=>a+(+e.custo||0),0);
-  view.innerHTML=`<div class="bar"><h2>Eventos</h2><button class="add" type="button" id="novo">+ Evento</button></div>
-  <div class="chips" id="chipsEv">${['',...ST_EVENTO].map(s=>`<button class="chip" type="button" data-s="${s}" aria-pressed="${(ST_EVENTO.includes(S.fStatus)?S.fStatus:'')===s}">${s||'Todos'}</button>`).join('')}</div>
-  ${L.length?`<p style="font-size:13px;color:var(--mut);margin:0 0 10px">${L.length} evento${L.length>1?'s':''} · contratos ${money(tv)} · custos ${money(tc)} · margem <b style="color:var(--fg)">${money(tv-tc)}</b></p>`:''}
-  <div class="rows">${L.length?L.map(e=>{const m=(+e.valor||0)-(+e.custo||0);return `<button class="row" type="button" data-open="eventos:${e.id}">
-    <div class="t">${esc(e.nome)}</div>
-    <div class="s">${esc([e.marca,dShort(e.data),(e.artistas||[]).map(artistaName).filter(Boolean).join(', ')].filter(Boolean).join(' · ')||'—')}</div>
-    <div class="r">${e.valor?`<span class="v">${money(e.valor)}</span><span style="font-size:12px" class="${m<0?'neg':'p-mut'}">margem ${money(m)}</span>`:''}${pill(e.status||'Prospecção')}</div></button>`}).join('')
-    :empty('Nenhum evento nesse filtro','Cadastre a ação, a marca e os artistas envolvidos.')}</div>`;
-  document.getElementById('novo').onclick=()=>openForm('eventos');
-  document.getElementById('chipsEv').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.fStatus=b.dataset.s;vEventos()};
-  bindOpen();
+  <div class="rows">${L.length?L.map(x=>dateRow(x,x.c==='marcas'&&x.data<TODAY)).join(''):empty(S.passados?'Sem compromissos anteriores':'Agenda livre','Eventos com data e follow-ups de marcas aparecem aqui junto com os compromissos.')}</div>`);
 }
 
 /* ---------- Financeiro ---------- */
@@ -525,26 +981,25 @@ function vFin(){
   const f=finMonth(S.month);
   let L=f.L.slice().sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   if(S.fTipo)L=L.filter(x=>x.tipo===S.fTipo);
-  view.innerHTML=`<div class="bar"><h2>Financeiro</h2>${monthNav()}<button class="add" type="button" id="novo">+ Lançamento</button></div>
+  paint(`<div class="bar"><h2>Financeiro</h2>${monthNav()}<button class="add" type="button" data-act="novo" data-v="financeiro">+ Lançamento</button></div>
   <div class="kpis">
     <div class="kpi"><label>Entradas</label><b class="pos">${money(f.ent)}</b></div>
     <div class="kpi"><label>Saídas</label><b class="neg">${money(f.sai)}</b></div>
     <div class="kpi"><label>Retiradas</label><b>${money(f.ret.reduce((a,b)=>a+b,0))}</b></div>
     <div class="kpi"><label>Resultado</label><b class="${f.res<0?'neg':''}">${money(f.res)}</b></div>
   </div>
+  <h3>Divisão entre sócios</h3>
+  <div class="split">${[0,1,2].map(i=>`<div><label>${esc(S.socios[i])}</label><b>${money(f.res/3)}</b><em>retirou ${money(f.ret[i])} · saldo ${money(f.res/3-f.ret[i])}</em></div>`).join('')}</div>
   <h3>Últimos 6 meses</h3>
   <div class="chart">${chart()}</div>
   <div class="key"><span style="--c:var(--pos)">Entradas</span><span style="--c:var(--neg)">Saídas</span><span style="--c:var(--fg)">Resultado</span></div>
   <h3>Lançamentos de ${monthLabel(S.month)}</h3>
-  <div class="chips" id="chipsFin">${['','Entrada','Saída'].map(t=>`<button class="chip" type="button" data-t="${t}" aria-pressed="${S.fTipo===t}">${t?t+'s':'Todos'}</button>`).join('')}</div>
+  <div class="chips">${['','Entrada','Saída'].map(t=>`<button class="chip" type="button" data-act="fTipo" data-v="${t}" aria-pressed="${S.fTipo===t}">${t?t+'s':'Todos'}</button>`).join('')}</div>
   <div class="rows">${L.length?L.map(x=>`<button class="row" type="button" data-open="financeiro:${x.id}">
     <div class="t">${esc(x.desc)}</div>
     <div class="s">${esc([dShort(x.data),x.categoria,socioName(x.socio)].filter(Boolean).join(' · '))}</div>
     <div class="r"><span class="v ${x.tipo==='Entrada'?'pos':'neg'}">${x.tipo==='Entrada'?'+':'−'} ${money(x.valor)}</span>${x.status==='Pendente'?pill('Pendente'):''}</div></button>`).join('')
-    :empty('Nenhum lançamento neste mês','Registre contratos recebidos, cachês pagos e despesas.')}</div>`;
-  document.getElementById('novo').onclick=()=>openForm('financeiro');
-  document.getElementById('chipsFin').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;S.fTipo=b.dataset.t;vFin()};
-  bindMonth();bindOpen();
+    :empty('Nenhum lançamento neste mês','Registre contratos recebidos, cachês pagos e despesas.')}</div>`);
 }
 function chart(){
   const ms=[5,4,3,2,1,0].map(k=>shiftMonth(S.month,-k)), d=ms.map(m=>finMonth(m));
@@ -558,7 +1013,7 @@ function chart(){
   d.forEach((x,i)=>{const cx=L+cw*i+cw/2;
     g+=`<rect x="${cx-bw-1}" y="${y(x.ent)}" width="${bw}" height="${Math.max(0,ch+T-y(x.ent))}" fill="var(--pos)" rx="1"><title>Entradas ${money(x.ent)}</title></rect>`;
     g+=`<rect x="${cx+1}" y="${y(x.sai)}" width="${bw}" height="${Math.max(0,ch+T-y(x.sai))}" fill="var(--neg)" rx="1"><title>Saídas ${money(x.sai)}</title></rect>`;
-    const [yy,mm]=ms[i].split('-').map(Number);
+    const mm=+ms[i].split('-')[1];
     g+=`<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="12" fill="${i===5?'var(--fg)':'var(--mut)'}" font-weight="${i===5?600:400}">${MES[mm-1]}</text>`;
     pts.push([cx,y(Math.max(0,x.res))]);});
   g+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--fg)" stroke-width="1.5"/>`;
@@ -566,94 +1021,296 @@ function chart(){
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Entradas e saídas dos últimos 6 meses">${g}</svg>`;
 }
 
-/* ---------- Formulário ---------- */
-const sheet=document.getElementById('sheet');
+/* ---------- Dicas ---------- */
+const DICAS=[
+ {h:'Captar marcas',p:'O que mais funciona para uma agência pequena entrar em marca grande.',l:[
+  ['Comece por quem já aparece no conteúdo','Se a Amstel já aparece nos Reels dos seus artistas, esse vídeo e as views dele viram o primeiro case. Mostre para a marca o alcance que ela teve sem pagar nada.'],
+  ['Fale com quem compra, não com o SAC','Em Heineken, Ambev ou Coca-Cola quem decide é o marketing de marca, o trade marketing regional ou a agência de influência que atende a conta. No LinkedIn, busque "brand manager", "trade marketing Rio" ou "influência" junto com o nome da marca.'],
+  ['Venda também para as agências das marcas','Muitas marcas grandes contratam criadores por meio de agências e plataformas de influência. Se apresentar como fornecedor de talentos para elas é um atalho para campanhas grandes.'],
+  ['Leve a proposta pronta','Em vez de perguntar se a marca tem interesse, mande: 3 criadores de futebol carioca, 85 mil seguidores somados, 5% de engajamento, 1 Reels collab + Stories ao vivo em dia de jogo, por R$ X.'],
+  ['Use o calendário das marcas','Campanhas são planejadas por data: Carnaval, Copa, Dia dos Pais, Black Friday, verão. Aborde de 60 a 90 dias antes.'],
+  ['Feche primeiro com marcas locais','Bares, hamburguerias, casas de show e distribuidoras fecham mais rápido e geram os números que abrem porta nas grandes.'],
+  ['Follow-up com data marcada','Quase ninguém responde ao primeiro contato. Faça 3 contatos em 2 semanas, cada um trazendo algo novo (um número, um vídeo, uma data), e registre o próximo passo na aba Marcas.']]},
+ {h:'Captar artistas (o trabalho de olheiro)',p:'Quem entra no elenco define o que a DRAFT consegue vender.',l:[
+  ['Engajamento vale mais que seguidores','Um perfil de 30 mil com 6% de engajamento costuma vender melhor que um de 300 mil com 0,5%. Conta: média de (curtidas + comentários) dos últimos 10 posts ÷ seguidores × 100.'],
+  ['Drafte pelo potencial, não só pelo geral','Como num draft de verdade: um artista com GER 68 e POT 88 que está crescendo pode valer mais em um ano do que um 80 parado. Use o POT para registrar essa aposta.'],
+  ['Escolha nichos que as marcas compram','Futebol, humor carioca, pagode, funk, gastronomia, vida noturna. A marca compra o público do artista.'],
+  ['Confira se a audiência é real','Comentários de gente de verdade, views dos Reels compatíveis com o número de seguidores e crescimento sem saltos estranhos.'],
+  ['Ofereça o que o artista não tem','Negociação, contrato, cobrança, roteiro e edição. É isso que justifica a comissão.'],
+  ['Contrato simples desde o primeiro dia','Comissão (agências costumam ficar entre 20% e 30%), prazo, exclusividade por segmento (não fechar com outra cerveja, por exemplo) e quem recebe da marca e em quantos dias repassa.']]},
+ {h:'Mídia kit',p:'O PDF de uma página que vai em todo primeiro contato. A ficha do artista no painel já tem quase tudo: tire um print dela.',l:[
+  ['Quem é e qual o nicho','Uma linha, com foto boa.'],
+  ['Números','Seguidores, views médias dos Reels e engajamento. Atualize todo mês.'],
+  ['Público','Idade, cidade e gênero, tirados do Instagram Insights do artista.'],
+  ['Cases','Dois ou três trabalhos com resultado: views, comentários, cupons usados. Use o Resultado da campanha de cada evento.'],
+  ['Formatos e preços','Reels, Stories, presença em evento e pacote. Deixe um pacote como opção mais vantajosa.']]},
+ {h:'Precificação',p:'Um jeito usado no mercado é cobrar por mil visualizações (CPM) e ajustar pelo nicho e pela exclusividade.',l:[
+  ['Exemplo','Reels com média de 40 mil views × R$ 30 a R$ 60 por mil = de R$ 1.200 a R$ 2.400.'],
+  ['Pacote','Reels + 3 Stories costuma sair 15% a 25% mais barato que somar as peças separadas, e fecha mais fácil.'],
+  ['Exclusividade e uso de imagem','Cobre à parte. Se a marca quer usar o vídeo em anúncio pago ou impedir o artista de trabalhar com concorrente, isso tem preço.']]}
+];
+const REFS=[
+ ['Mynd e Play9','Juntam gestão de talentos e venda para marcas no mesmo lugar, o mesmo modelo da DRAFT. Vale copiar: elenco organizado por nicho, mídia kit sempre atualizado e um responsável por cada marca.'],
+ ['Heineken e Ambev','Planejam verba por ano e por data. O que entra fora do plano costuma vir de trade marketing regional e ativações em eventos.'],
+ ['Relatório pós-campanha','Agências grandes mandam números até 7 dias depois da entrega: views, alcance, comentários, prints. É o que faz a marca renovar.'],
+ ['Um dono por conta','Cada marca tem um sócio responsável. Use o campo Sócio responsável nas abas Marcas e Eventos.']
+];
+function vDicas(){
+  paint(`<div class="bar"><h2>Dicas</h2></div>
+  <section class="tip"><h3>Como funciona a carta (GER)</h3>
+    <p>O geral é a média dos atributos preenchidos. ALC vem dos seguidores, ENG do engajamento e VIS das views médias por Reels. IMG, PRO e CON são a nota que vocês dão como olheiros. POT é a aposta de até onde o artista pode chegar.</p>
+    <div class="scale"><div class="t-bronze"><small>BRONZE</small><b>até 64</b></div><div class="t-prata"><small>PRATA</small><b>65 a 74</b></div><div class="t-ouro"><small>OURO</small><b>75 a 84</b></div><div class="t-elite"><small>ELITE</small><b>85+</b></div></div>
+    <p style="margin-top:12px">Referência dos números: 10 mil seguidores dá ALC 53, 100 mil dá 71 e 1 milhão dá 89. Engajamento de 3% dá ENG 67 e 5% dá 85. Views médias de 10 mil dão VIS 60 e 100 mil dão 80.</p>
+  </section>
+  ${DICAS.map(d=>`<section class="tip"><h3>${esc(d.h)}</h3><p>${esc(d.p)}</p><ul>${d.l.map(([b,t])=>`<li><b>${esc(b)}</b><span>${esc(t)}</span></li>`).join('')}</ul></section>`).join('')}
+  <section class="tip"><h3>Como as grandes fazem</h3><div class="ref">${REFS.map(([b,t])=>`<div><b>${esc(b)}</b><small>${esc(t)}</small></div>`).join('')}</div></section>`);
+}
+
+/* ---------- formulário ---------- */
+const sheet=$('#sheet');
 function field(f,v){
+  if(f.sec)return `<div class="fsec">${esc(f.sec)}${f.hint?`<small>${esc(f.hint)}</small>`:''}</div>`;
   const id='f_'+f.k, cls=f.full?' class="full"':'', req=f.req?' required':'';
   let inp;
-  if(f.t==='select')inp=`<select id="${id}" name="${f.k}"${req}>${f.req?'':'<option value=""></option>'}${f.o.map(o=>`<option${o===v?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  if(f.t==='foto'){
+    return `<div class="full foto ${f.kind}" data-k="${f.k}" data-kind="${f.kind}">
+      <div class="fprev">${v?`<img src="${v}" alt="">`:'Sem imagem'}</div>
+      <div class="fb"><span class="fsec" style="border:0;padding:0;margin:0">${esc(f.l)}</span>
+        <span class="btn2 fpick">${v?'Trocar':'Escolher'} ${f.kind==='logo'?'logo':'foto'}<input type="file" accept="image/*" data-file="${f.k}" aria-label="${esc(f.l)}"></span>
+        <button type="button" class="hint" data-rm="${f.k}" style="background:none;border:0;padding:0"${v?'':' hidden'}>Remover</button></div>
+      <input type="hidden" name="${f.k}" id="${id}" value="${esc(v||'')}"></div>`;
+  }
+  if(f.t==='range'){
+    const set=v!==''&&v!=null&&+v>0;
+    return `<label class="rng"><span class="rh"><span>${esc(f.l)}</span><b id="rv_${f.k}" class="${set?'':'unset'}">${set?+v:'sem nota'}</b></span>
+      <input type="range" id="${id}" name="${f.k}" min="1" max="99" value="${set?+v:50}"${set?' data-set="1"':''}></label>`;
+  }
+  if(f.t==='select')inp=`<select id="${id}" name="${f.k}"${req}>${f.req?'':'<option value=""></option>'}${f.o.map(o=>`<option value="${esc(o)}"${o===v?' selected':''}>${esc(stLabel(o))}</option>`).join('')}</select>`;
   else if(f.t==='socio')inp=`<select id="${id}" name="${f.k}"><option value=""></option>${S.socios.map((s,i)=>`<option value="${i}"${String(v)===String(i)?' selected':''}>${esc(s)}</option>`).join('')}</select>`;
   else if(f.t==='artista')inp=`<select id="${id}" name="${f.k}"><option value=""></option>${S.data.artistas.slice().sort((a,b)=>(a.nome||'').localeCompare(b.nome||'')).map(a=>`<option value="${a.id}"${v===a.id?' selected':''}>${esc(a.nome)}</option>`).join('')}</select>`;
   else if(f.t==='evento')inp=`<select id="${id}" name="${f.k}"><option value=""></option>${S.data.eventos.slice().sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(e=>`<option value="${e.id}"${v===e.id?' selected':''}>${esc(e.nome)}${e.marca?' — '+esc(e.marca):''}</option>`).join('')}</select>`;
-  else if(f.t==='artistas'){const sel=v||[];inp=S.data.artistas.length?`<div class="checks">${S.data.artistas.map(a=>`<label><input type="checkbox" name="artistas" value="${a.id}"${sel.includes(a.id)?' checked':''}>${esc(a.nome)}</label>`).join('')}</div>`:`<span style="font-size:13px">Cadastre artistas primeiro.</span>`;return `<div${cls}><label style="margin-bottom:6px">${esc(f.l)}</label>${inp}</div>`}
-  else if(f.t==='insta'){const h=igHandle(v);inp=`<input id="${id}" name="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" autocapitalize="off" autocomplete="off">${h?`<a class="iglink" href="${igUrl(h)}" target="_blank" rel="noopener">Abrir @${esc(h)} no Instagram ↗</a>`:''}`}
-  else if(f.t==='marcalist')inp=`<input id="${id}" name="${f.k}" list="dl_marcas" value="${esc(v)}" autocomplete="off"><datalist id="dl_marcas">${S.data.marcas.map(m=>`<option value="${esc(m.marca)}"></option>`).join('')}</datalist>`;
-  else if(f.t==='num')inp=`<input id="${id}" name="${f.k}" inputmode="decimal" placeholder="${esc(f.ph||'')}" value="${v?esc(String(v).replace('.',',')):''}">`;
-  else if(f.t==='area')inp=`<textarea id="${id}" name="${f.k}">${esc(v)}</textarea>`;
+  else if(f.t==='artistas'){const sel=v||[];const L=S.data.artistas.filter(a=>a.status==='Ativo'||!a.status||sel.includes(a.id)).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+    inp=L.length?`<div class="checks">${L.map(a=>`<label><input type="checkbox" name="artistas" value="${a.id}"${sel.includes(a.id)?' checked':''}>${esc(a.nome)}</label>`).join('')}</div>`:`<span style="font-size:13px">Cadastre artistas no elenco primeiro.</span>`;
+    return `<div${cls}><label style="margin-bottom:6px">${esc(f.l)}</label>${inp}</div>`}
+  else if(f.t==='area')inp=`<textarea id="${id}" name="${f.k}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`;
   else if(f.t==='money')inp=`<input id="${id}" name="${f.k}" inputmode="decimal" placeholder="0,00" value="${v?esc(String(v).replace('.',',')):''}"${req}>`;
+  else if(f.t==='num')inp=`<input id="${id}" name="${f.k}" inputmode="decimal" placeholder="${esc(f.ph||'')}" value="${v?esc(String(v).replace('.',',')):''}">`;
+  else if(f.t==='insta'||f.t==='tiktok'){const h=handle(v);inp=`<input id="${id}" name="${f.k}" value="${esc(v)}" placeholder="${esc(f.ph||'')}" autocapitalize="off" autocomplete="off">${h?`<a class="iglink" href="${f.t==='insta'?igUrl(h):ttUrl(h)}" target="_blank" rel="noopener">Abrir @${esc(h)} ↗</a>`:''}${f.sync?`<span class="hint" id="igst">${IG?'Ao sair do campo, busca foto e números no Instagram.':'Conecte o Instagram em Ajustes para preencher sozinho.'}</span>`:''}`}
+  else if(f.t==='marcalist')inp=`<input id="${id}" name="${f.k}" list="dl_marcas" value="${esc(v)}" autocomplete="off"><datalist id="dl_marcas">${S.data.marcas.map(m=>`<option value="${esc(m.marca)}"></option>`).join('')}</datalist>`;
   else inp=`<input id="${id}" name="${f.k}" type="${f.t||'text'}" value="${esc(v)}" placeholder="${esc(f.ph||'')}"${req}>`;
-  if(f.t==='area'&&f.ph)inp=inp.replace('<textarea ','<textarea placeholder="'+esc(f.ph)+'" ');
   return `<label${cls}>${esc(f.l)}${inp}</label>`;
 }
-function openForm(coll,id){
+async function shrink(file,kind){
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+    const [w,h]=kind==='capa'?[960,540]:kind==='logo'?[240,240]:[480,480];
+    const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+    const iw=img.naturalWidth,ih=img.naturalHeight;
+    if(kind==='logo'){x.fillStyle='#fff';x.fillRect(0,0,w,h);const s=Math.min(w*.86/iw,h*.86/ih);x.drawImage(img,(w-iw*s)/2,(h-ih*s)/2,iw*s,ih*s)}
+    else{const s=Math.max(w/iw,h/ih),dw=iw*s,dh=ih*s;x.drawImage(img,(w-dw)/2,(h-dh)*(kind==='capa'?.5:.22),dw,dh)}
+    let q=.82,out=c.toDataURL('image/jpeg',q);
+    while(out.length>700000&&q>.4){q-=.12;out=c.toDataURL('image/jpeg',q)}
+    return out;
+  }finally{URL.revokeObjectURL(url)}
+}
+let closer=null;
+function openForm(coll,id,over){
   const sc=SCHEMA[coll], cur=id?S.data[coll].find(x=>x.id===id):null;
-  const defs={data:coll==='financeiro'||coll==='agenda'?TODAY:'',status:coll==='financeiro'?'Pago':coll==='eventos'?'Prospecção':coll==='artistas'?'Ativo':coll==='marcas'?'A prospectar':'',tipo:coll==='financeiro'?'Entrada':''};
+  const defs={data:coll==='financeiro'||coll==='agenda'?TODAY:'',status:coll==='financeiro'?'Pago':coll==='eventos'?'Prospecção':coll==='artistas'?'Ativo':coll==='marcas'?'A prospectar':'',tipo:coll==='financeiro'?'Entrada':'',...(over||{})};
   const val=k=>cur?cur[k]:defs[k];
-  let docId=id||null, timer=null, busy=Promise.resolve();
+  let docId=id||null, timer=null, busy=Promise.resolve(), fotoAuto=!!(cur&&cur.fotoAuto), igSyncEm=cur&&cur.igSyncEm||'';
   sheet.innerHTML=`<form id="frm" novalidate><h2>${cur?'Editar':'Novo'} ${sc.nome}</h2><div class="f">${sc.f.map(f=>field(f,val(f.k))).join('')}</div>
     <div class="err" id="err" hidden></div>
-    ${coll==='eventos'&&cur?(()=>{const n=S.data.financeiro.filter(x=>x.evento===id).length;return `<div class="actions"><button type="button" class="cancel" id="lancar"${n?' disabled':''}>${n?'Já lançado no financeiro ('+n+')':'Lançar no financeiro'}</button><span class="hint">${n?'':'Cria a entrada do contrato e a saída dos cachês como pendentes.'}</span></div>`})():''}
-    <div class="actions">${cur?'<button type="button" class="del" id="del">Excluir</button>':''}<span class="sp"></span><span class="hint" id="ind">${cur?'Também salva sozinho':'Também salva sozinho ao preencher'}</span><button class="add" type="submit">Salvar</button></div></form>`;
+    <div class="actions">${cur?'<button type="button" class="del" id="del">Excluir</button>':''}<span class="sp"></span><span class="hint" id="ind">${cur?'Também salva sozinho':'Também salva sozinho ao preencher'}</span><button class="btn2" type="button" id="cancel">Fechar</button><button class="add" type="submit">Salvar</button></div></form>`;
   sheet.hidden=false;
-  const frm=document.getElementById('frm'), ind=document.getElementById('ind'), err=document.getElementById('err');
-  setTimeout(()=>{const first=frm.querySelector('input,select');if(first&&!cur)first.focus()},30);
+  const frm=$('#frm'), ind=$('#ind'), err=$('#err');
+  setTimeout(()=>{if(!cur){const first=frm.querySelector('input:not([type=hidden]):not([type=file]),select');if(first)first.focus()}},30);
   function collect(){
     const o={};sc.f.forEach(f=>{
+      if(f.sec)return;
       if(f.t==='artistas'){o.artistas=[...frm.querySelectorAll('input[name="artistas"]:checked')].map(c=>c.value);return}
-      const el=frm.elements[f.k];if(!el)return;let v=el.value.trim();
+      const el=frm.elements[f.k];if(!el)return;
+      if(f.t==='range'){o[f.k]=el.dataset.set?+el.value:'';return}
+      if(f.t==='foto'){o[f.k]=el.value;return}
+      let v=el.value.trim();
       if(f.t==='money'||f.t==='num')v=parseMoney(v);
-      if(f.t==='insta'&&v)v='@'+igHandle(v);
+      if((f.t==='insta'||f.t==='tiktok')&&v)v='@'+handle(v);
       o[f.k]=v;});
+    if(coll==='artistas'){o.fotoAuto=fotoAuto&&!!o.foto;if(igSyncEm)o.igSyncEm=igSyncEm}
     return {o,miss:sc.f.filter(f=>f.req&&!o[f.k]).map(f=>f.l)};
   }
   async function autosave(){
     timer=null;const {o,miss}=collect();
-    if(miss.length){ind.textContent='Falta: '+miss.join(', ');return}
+    if(miss.length){ind.textContent='Falta: '+miss.join(', ');return false}
     if(!docId)docId=newId(coll);
     ind.textContent='Salvando…';
-    try{await save(coll,docId,o);ind.textContent=navigator.onLine?'Salvo':'Salvo no aparelho, envia quando voltar a internet';err.hidden=true}
-    catch(x){err.hidden=false;err.textContent=x&&x.code==='quota_exceeded'?'Limite de registros atingido. Exclua itens antigos.':'Não foi possível salvar este campo. Confira o que foi digitado.'}
+    try{await save(coll,docId,o);ind.textContent=navigator.onLine?'Salvo':'Salvo no aparelho, sincroniza quando voltar a internet';err.hidden=true;return true}
+    catch(x){err.hidden=false;err.textContent='Não foi possível salvar. Confira o que foi digitado.';return false}
   }
-  const sched=()=>{clearTimeout(timer);ind.textContent='Editando…';timer=setTimeout(()=>{busy=busy.then(autosave)},600)};
-  frm.addEventListener('input',sched);frm.addEventListener('change',sched);
-  closer=async()=>{if(timer){clearTimeout(timer);busy=busy.then(autosave)}await busy;close()};
+  const sched=()=>{clearTimeout(timer);ind.textContent='Editando…';timer=setTimeout(()=>{busy=busy.then(autosave)},700)};
+  frm.addEventListener('input',e=>{
+    if(e.target.type==='range'){e.target.dataset.set='1';const b=$('#rv_'+e.target.name);b.textContent=e.target.value;b.classList.remove('unset')}
+    if(e.target.type==='file')return;
+    sched();
+  });
+  frm.addEventListener('change',async e=>{
+    if(e.target.type==='file'){
+      const file=e.target.files&&e.target.files[0];if(!file)return;
+      const k=e.target.dataset.file,box=frm.querySelector(`.foto[data-k="${k}"]`);
+      box.querySelector('.fprev').textContent='Carregando…';
+      try{const d=await shrink(file,box.dataset.kind);frm.elements[k].value=d;if(k==='foto')fotoAuto=false;box.querySelector('.fprev').innerHTML=`<img src="${d}" alt="">`;box.querySelector('[data-rm]').hidden=false;sched()}
+      catch(x){box.querySelector('.fprev').textContent='Formato não suportado';}
+      e.target.value='';return;
+    }
+    if(e.target.name==='insta'&&coll==='artistas'&&IG)igFill();
+    if(e.target.type!=='range')sched();
+  });
+  let igLast='';
+  async function igFill(){
+    const h=handle(frm.elements.insta.value),st=$('#igst');if(!h||h===igLast)return;igLast=h;
+    st.textContent='Buscando @'+h+' no Instagram…';
+    try{
+      const d=await igLookup(h);
+      const setv=(k,v)=>{if(frm.elements[k]&&v!=null&&v!=='')frm.elements[k].value=String(v).replace('.',',')};
+      if(!frm.elements.nome.value.trim()&&d.nome)frm.elements.nome.value=d.nome;
+      setv('seguidores',d.seguidores);setv('engaj',d.engaj);
+      if(!String(frm.elements.destaques.value).trim()&&d.reels.length)frm.elements.destaques.value=d.reels.join('\n');
+      const box=frm.querySelector('.foto[data-k="foto"]');
+      if(d.fotoUrl&&(!frm.elements.foto.value||fotoAuto)){const f=await urlToData(d.fotoUrl)||d.fotoUrl;frm.elements.foto.value=f;fotoAuto=true;box.querySelector('.fprev').innerHTML=`<img src="${esc(f)}" alt="">`;box.querySelector('[data-rm]').hidden=false}
+      igSyncEm=new Date().toISOString();
+      st.textContent=`Encontrado: ${compact.format(d.seguidores||0)} seguidores${d.engaj!=null?' · '+num(d.engaj)+'% de engajamento':''}${d.reels.length?' · '+d.reels.length+' Reels nos destaques':''}.`;
+      sched();
+    }catch(x){igLast='';st.textContent=igErr(x,h)}
+  }
+  frm.addEventListener('click',e=>{const r=e.target.closest('[data-rm]');if(!r)return;const k=r.dataset.rm;if(k==='foto')fotoAuto=false;frm.elements[k].value='';const box=frm.querySelector(`.foto[data-k="${k}"]`);box.querySelector('.fprev').textContent='Sem imagem';r.hidden=true;sched()});
+  closer=async()=>{if(timer){clearTimeout(timer);timer=null;busy=busy.then(autosave)}await busy;close()};
+  $('#cancel').onclick=()=>closer();
   frm.onsubmit=async e=>{e.preventDefault();clearTimeout(timer);timer=null;await busy;
     const {miss}=collect();
     if(miss.length){err.hidden=false;err.textContent='Preencha: '+miss.join(', ');return}
-    await autosave();if(err.hidden)close()};
-  const del=document.getElementById('del');
+    if(await autosave()){close();toast('Salvo')}};
+  const del=$('#del');
   if(del)del.onclick=async()=>{if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='Confirmar exclusão';return}
-    clearTimeout(timer);timer=null;await busy;await remove(coll,docId);close()};
-  const lan=document.getElementById('lancar');
-  if(lan&&!lan.disabled)lan.onclick=async()=>{
-    if(timer){clearTimeout(timer);busy=busy.then(autosave)}await busy;
-    const c=S.data.eventos.find(x=>x.id===docId)||cur;
-    if(!c.valor&&!c.custo){err.hidden=false;err.textContent='Preencha o valor do contrato ou os custos antes de lançar.';return}
-    lan.disabled=true;lan.textContent='Lançando…';
-    try{
-      if(c.valor)await save('financeiro',newId('financeiro'),{desc:'Contrato: '+c.nome+(c.marca?' ('+c.marca+')':''),tipo:'Entrada',valor:c.valor,data:c.vencimento||c.data||TODAY,status:'Pendente',categoria:'Contrato',socio:c.socio||'',evento:docId});
-      if(c.custo)await save('financeiro',newId('financeiro'),{desc:'Cachês: '+c.nome,tipo:'Saída',valor:c.custo,data:c.data||c.vencimento||TODAY,status:'Pendente',categoria:'Cachê artista',socio:c.socio||'',evento:docId});
-      close();
-    }catch(x){err.hidden=false;err.textContent='Não foi possível lançar. Tente de novo.';lan.disabled=false;lan.textContent='Lançar no financeiro'}};
+    clearTimeout(timer);timer=null;await busy;await remove(coll,docId);
+    if(S.detail&&S.detail.id===docId){S.detail=null;if(history.state&&history.state.d)history.replaceState(null,'')}
+    close();toast('Excluído')};
 }
-let closer=null;
 function close(){closer=null;sheet.hidden=true;sheet.innerHTML='';render()}
 const tryClose=()=>closer?closer():close();
 sheet.addEventListener('click',e=>{if(e.target===sheet)tryClose()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!sheet.hidden)tryClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#fx').hidden)$('#fx').hidden=true;else if(!sheet.hidden)tryClose()}});
+let toastT=null;
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2400)}
 
-document.getElementById('btnSocios').onclick=()=>{
-  sheet.innerHTML=`<form id="frm"><h2>Sócios</h2><div class="f">${[0,1,2].map(i=>`<label class="full">Sócio ${i+1}<input id="soc${i}" value="${esc(S.socios[i])}"></label>`).join('')}</div>
-  <p style="font-size:13px;color:var(--mut)">O resultado do mês é dividido em partes iguais entre os três.</p>
-  <div class="actions"><span class="sp"></span><span class="hint" id="ind">Também salva sozinho</span><button class="add" type="submit">Salvar</button></div></form>`;
+$('#btnSocios').onclick=()=>{
+  sheet.innerHTML=`<form id="frm"><h2>Ajustes</h2><div class="f">
+    <div class="fsec">Sócios<small>O resultado do mês é dividido em partes iguais entre os três.</small></div>
+    ${[0,1,2].map(i=>`<label class="full">Sócio ${i+1}<input id="soc${i}" value="${esc(S.socios[i])}"></label>`).join('')}
+    <div class="fsec">Instagram<small>${IG?`Conectado pela conta @${esc(IG.username||'')}. Ao colocar o @ de um artista, o painel busca foto, seguidores e engajamento sozinho.`:'Cole aqui o token gerado no painel da Meta para o painel buscar foto e números dos artistas pelo @.'}</small></div>
+    <label class="full">Token de acesso da Meta<textarea id="igToken" placeholder="EAAG…" autocomplete="off" spellcheck="false">${''}</textarea></label>
+    <div class="full actions" style="margin:0"><button type="button" class="btn2" id="igCon">${IG?'Trocar token':'Conectar Instagram'}</button>${IG?'<button type="button" class="del" id="igOff">Desconectar</button>':''}<span class="hint" id="igMsg"></span></div>
+  </div>
+  <div class="actions"><span class="sp"></span><span class="hint" id="ind">Os nomes salvam sozinhos</span><button class="add" type="submit">Pronto</button></div></form>`;
   sheet.hidden=false;
-  const frm=document.getElementById('frm'),ind=document.getElementById('ind');let t=null;
-  const go=async()=>{t=null;const n=[0,1,2].map(i=>document.getElementById('soc'+i).value.trim()||`Sócio ${i+1}`);
-    S.socios=n;cacheWrite();await put('config','socios',{nomes:n});ind.textContent='Salvo'};
-  frm.oninput=()=>{clearTimeout(t);ind.textContent='Editando…';t=setTimeout(go,600)};
-  closer=async()=>{if(t){clearTimeout(t);await go()}close()};
+  const frm=$('#frm'),ind=$('#ind');let t=null;
+  const goSave=async()=>{t=null;const n=[0,1,2].map(i=>$('#soc'+i).value.trim()||`Sócio ${i+1}`);S.socios=n;await put('config','socios',{nomes:n});ind.textContent='Salvo'};
+  frm.oninput=e=>{if(!e.target.id.startsWith('soc'))return;clearTimeout(t);ind.textContent='Editando…';t=setTimeout(goSave,600)};
+  $('#igCon').onclick=async()=>{
+    const tok=$('#igToken').value.trim(),msg=$('#igMsg');
+    if(!tok){msg.textContent='Cole o token primeiro.';return}
+    msg.textContent='Conectando…';
+    try{const r=await igConnect(tok);await put('config','instagram',{token:tok,igId:r.igId,username:r.username,em:new Date().toISOString()});IG={token:tok,igId:r.igId,username:r.username};msg.textContent='Conectado como @'+r.username+'.';$('#igToken').value='';igAutoDone=false;igAuto()}
+    catch(x){msg.textContent=x&&x.code===190?'Token inválido ou expirado. Gere outro.':'Não foi possível conectar: '+((x&&x.message)||'erro desconhecido')}
+  };
+  const off=$('#igOff');if(off)off.onclick=async()=>{await remove('config','instagram');IG=null;close();toast('Instagram desconectado')};
+  closer=async()=>{if(t){clearTimeout(t);await goSave()}close()};
   frm.onsubmit=e=>{e.preventDefault();closer()};
 };
+
+/* ---------- Instagram (API oficial da Meta: Business Discovery) ---------- */
+let IG=null, igAutoDone=false;
+const GV='v21.0';
+async function igApi(path,params){
+  const u=new URL(`https://graph.facebook.com/${GV}/${path}`);
+  Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
+  const r=await fetch(u);const j=await r.json().catch(()=>({error:{message:'Resposta inválida'}}));
+  if(j.error)throw j.error;return j;
+}
+async function igConnect(token){
+  try{const me=await igApi('me',{fields:'instagram_business_account{id,username}',access_token:token});
+    if(me.instagram_business_account)return{igId:me.instagram_business_account.id,username:me.instagram_business_account.username}}
+  catch(e){if(e.code===190)throw e}
+  const acc=await igApi('me/accounts',{fields:'name,instagram_business_account{id,username}',access_token:token});
+  const p=(acc.data||[]).find(x=>x.instagram_business_account);
+  if(!p)throw{message:'nenhuma conta profissional do Instagram ligada a uma página do Facebook neste token.'};
+  return{igId:p.instagram_business_account.id,username:p.instagram_business_account.username};
+}
+async function igLookup(h){
+  if(!IG)throw{message:'Instagram não conectado'};
+  const f=`business_discovery.username(${h}){username,name,profile_picture_url,followers_count,media_count,media.limit(12){like_count,comments_count,media_product_type,permalink}}`;
+  const j=await igApi(IG.igId,{fields:f,access_token:IG.token});
+  const b=j.business_discovery||{};
+  const m=(b.media&&b.media.data)||[];
+  const inter=m.filter(x=>x.like_count!=null).map(x=>(x.like_count||0)+(x.comments_count||0));
+  const eng=inter.length&&b.followers_count?inter.reduce((a,c)=>a+c,0)/inter.length/b.followers_count*100:null;
+  const reels=m.filter(x=>x.media_product_type==='REELS'&&x.permalink).sort((a,c)=>((c.like_count||0)+(c.comments_count||0))-((a.like_count||0)+(a.comments_count||0))).slice(0,3).map(x=>x.permalink);
+  return{nome:b.name||'',seguidores:b.followers_count||0,engaj:eng!=null?Math.round(eng*10)/10:null,fotoUrl:b.profile_picture_url||'',reels};
+}
+function igErr(x,h){
+  if(x&&x.code===190)return 'A conexão com o Instagram expirou. Gere um token novo em Ajustes.';
+  if(x&&(x.code===110||x.code===100||x.error_subcode===2207013))return `Não achei @${h} como conta profissional. O Instagram só libera dados de contas Criador ou Comercial; preencha os números à mão.`;
+  if(x&&(x.code===4||x.code===17||x.code===32))return 'Limite de buscas do Instagram atingido. Tente de novo em uma hora.';
+  return 'Não foi possível buscar no Instagram agora. Preencha à mão ou tente de novo.';
+}
+async function urlToData(url){try{const r=await fetch(url,{mode:'cors'});if(!r.ok)return null;return await shrink(await r.blob(),'sq')}catch(e){return null}}
+async function igSync(id){
+  const a=art(id),h=handle(a&&a.insta);if(!a||!h)return null;
+  const d=await igLookup(h);
+  const o={seguidores:d.seguidores||a.seguidores||'',igSyncEm:new Date().toISOString()};
+  if(d.engaj!=null)o.engaj=d.engaj;
+  if(d.fotoUrl&&(!a.foto||a.fotoAuto)){o.foto=await urlToData(d.fotoUrl)||d.fotoUrl;o.fotoAuto=true}
+  if(!String(a.destaques||'').trim()&&d.reels.length)o.destaques=d.reels.join('\n');
+  await save('artistas',id,o);return d;
+}
+async function igSyncBtn(id,btn){
+  btn.disabled=true;btn.textContent='Buscando…';
+  try{const d=await igSync(id);toast(`Atualizado: ${compact.format(d.seguidores||0)} seguidores`)}
+  catch(x){toast(igErr(x,handle((art(id)||{}).insta)))}
+  render();
+}
+async function igAuto(){
+  if(igAutoDone||!IG||!S.data.artistas.length)return;igAutoDone=true;
+  const lim=new Date(Date.now()-7*864e5).toISOString();
+  const L=S.data.artistas.filter(a=>a.insta&&(!a.igSyncEm||a.igSyncEm<lim)).slice(0,15);
+  for(const a of L){try{await igSync(a.id)}catch(x){if(x&&(x.code===190||x.code===4||x.code===17||x.code===32))break}await new Promise(r=>setTimeout(r,1500))}
+}
+
+/* ---------- música (Spotify) ---------- */
+const music=$('#music'),muBody=$('#muBody');
+function spEmbed(v){
+  v=String(v||'').trim();let m=v.match(/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(?:embed\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]+)/)||v.match(/^spotify:(playlist|album|track|artist|show|episode):([A-Za-z0-9]+)$/);
+  return m?`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`:'';
+}
+const LSg=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, LSs=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+function muPick(msg){
+  muBody.innerHTML=`<form class="mu-pick" id="muForm"><input id="muLink" placeholder="Cole o link de uma playlist, álbum ou música do Spotify" autocomplete="off" aria-label="Link do Spotify"><button class="add" type="submit">Tocar</button>
+    <button class="btn2" type="button" data-sp="https://open.spotify.com/playlist/37i9dQZEVXbMXbN3EUUhlg">Top 50 Brasil</button><span class="hint">${esc(msg||'No Spotify: Compartilhar → Copiar link.')}</span></form>`;
+  $('#muForm').onsubmit=e=>{e.preventDefault();muPlay($('#muLink').value)};
+  muBody.querySelector('[data-sp]').onclick=e=>muPlay(e.target.dataset.sp);
+  music.classList.remove('min');
+}
+function muPlay(link){
+  const src=spEmbed(link);if(!src){muPick('Esse link não é do Spotify. Tente de novo.');return}
+  LSs('draft_musica',link);
+  muBody.innerHTML=`<iframe src="${esc(src)}" height="80" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Player do Spotify"></iframe>`;
+}
+function muOpen(){music.hidden=false;document.body.classList.add('has-music');if(!muBody.innerHTML){const l=LSg('draft_musica');l?muPlay(l):muPick()}LSs('draft_musica_on','1')}
+$('#btnMusica').onclick=()=>{if(music.hidden)muOpen();else music.classList.toggle('min')};
+$('#muMin').onclick=()=>music.classList.toggle('min');
+$('#muTrocar').onclick=()=>muPick();
+$('#muClose').onclick=()=>{music.hidden=true;muBody.innerHTML='';document.body.classList.remove('has-music');LSs('draft_musica_on',null)};
+if(LSg('draft_musica_on'))muOpen();
 
 /* ---------- dados: Firebase (sincroniza entre os sócios e guarda cópia offline no aparelho) ---------- */
 const firebaseConfig={
@@ -668,7 +1325,6 @@ firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth();
 db=firebase.firestore();
 db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
-function cacheWrite(){}
 const newId=c=>db.collection(c).doc().id;
 function applyLocal(op){
   if(!S.data[op.c])return;
@@ -676,13 +1332,18 @@ function applyLocal(op){
   else{const i=S.data[op.c].findIndex(x=>x.id===op.id);const row={id:op.id,...op.body};if(i<0)S.data[op.c].push(row);else S.data[op.c][i]=row}
 }
 const wait=p=>Promise.race([p,new Promise(r=>setTimeout(r,navigator.onLine?5000:30))]);
-function denied(x){if(x&&x.code==='permission-denied'){showStatus('Seu e-mail não tem permissão para salvar. Peça para liberar nas regras do Firebase.')}}
+function denied(x){if(x&&x.code==='permission-denied')showStatus('Seu e-mail não tem permissão para salvar. Peça para liberar nas regras do Firebase.')}
 async function put(c,id,body){const p=db.collection(c).doc(id).set(body);p.catch(denied);await wait(p)}
 async function save(coll,id,o){
   const prev=S.data[coll].find(x=>x.id===id);
   const {id:_,...rest}=prev||{};
   const body={...rest,...o};
   if(prev)body.atualizadoEm=new Date().toISOString();else body.criadoEm=new Date().toISOString();
+  if(coll==='artistas'){
+    const g=ger(body),h=Array.isArray(body.historico)?body.historico.slice():[];
+    if(g!=null){const last=h[h.length-1];if(!last||last.o!==g){if(last&&last.d===TODAY)h[h.length-1]={d:TODAY,o:g};else h.push({d:TODAY,o:g})}}
+    body.historico=h.slice(-36);
+  }
   applyLocal({op:'set',c:coll,id,body});
   await put(coll,id,body);
 }
@@ -690,7 +1351,7 @@ async function remove(coll,id){
   if(!id)return;applyLocal({op:'del',c:coll,id});
   const p=db.collection(coll).doc(id).delete();p.catch(denied);await wait(p);
 }
-const status=document.getElementById('status');
+const status=$('#status');
 let pending=false, forced='';
 function showStatus(msg){
   if(msg!==undefined)forced=msg;
@@ -703,10 +1364,10 @@ window.addEventListener('online',()=>showStatus());
 window.addEventListener('offline',()=>showStatus());
 
 /* ---------- login ---------- */
-const loginEl=document.getElementById('login'), loginMsg=document.getElementById('loginMsg');
+const loginEl=$('#login'), loginMsg=$('#loginMsg');
 const prov=new firebase.auth.GoogleAuthProvider();
 prov.setCustomParameters({prompt:'select_account'});
-document.getElementById('btnLogin').onclick=async()=>{
+$('#btnLogin').onclick=async()=>{
   loginMsg.textContent='';
   try{await auth.signInWithPopup(prov)}
   catch(e){
@@ -716,7 +1377,7 @@ document.getElementById('btnLogin').onclick=async()=>{
   }
 };
 auth.getRedirectResult().catch(e=>{if(e&&e.code)loginMsg.textContent='Não foi possível entrar ('+e.code+').'});
-document.getElementById('btnSair').onclick=()=>auth.signOut();
+$('#btnSair').onclick=()=>auth.signOut();
 
 let unsubs=[];
 const SEED=[
@@ -741,18 +1402,22 @@ async function seedOnce(){
     await b.commit();
   }catch(e){}
 }
+let rT=null;
+const softRender=()=>{clearTimeout(rT);rT=setTimeout(()=>{if(sheet.hidden)render()},40)};
 function start(){
   unsubs.forEach(u=>u());unsubs=[];
   COLLS.forEach(c=>unsubs.push(db.collection(c).onSnapshot({includeMetadataChanges:true},snap=>{
     S.data[c]=snap.docs.map(d=>({id:d.id,...d.data()}));
     const p=snap.metadata.hasPendingWrites;if(p!==pending){pending=p;showStatus()}
-    if(sheet.hidden)render();
+    softRender();
+    if(c==='artistas'&&!snap.metadata.fromCache)igAuto();
   },e=>{if(e.code==='permission-denied')showStatus('Seu e-mail ('+(auth.currentUser&&auth.currentUser.email)+') não está liberado neste painel. Peça a um sócio para adicionar nas regras do Firebase.');else showStatus('A conexão com os dados caiu. Recarregue a página.')})));
-  unsubs.push(db.doc('config/socios').onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().nomes)){S.socios=s.data().nomes.slice(0,3);if(sheet.hidden)render()}},()=>{}));
+  unsubs.push(db.doc('config/instagram').onSnapshot(s=>{IG=s.exists&&s.data().token?s.data():null;igAuto()},()=>{}));
+  unsubs.push(db.doc('config/socios').onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().nomes)){S.socios=s.data().nomes.slice(0,3);softRender()}},()=>{}));
   seedOnce();
 }
 auth.onAuthStateChanged(u=>{
-  document.getElementById('who').textContent=u?u.email:'';
+  $('#who').textContent=u?u.email:'';
   if(!u){unsubs.forEach(f=>f());unsubs=[];COLLS.forEach(c=>S.data[c]=[]);loginEl.hidden=false;render();return}
   loginEl.hidden=true;forced='';showStatus();start();
 });
