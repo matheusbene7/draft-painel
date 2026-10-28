@@ -1,7 +1,7 @@
 // Guarda o painel no aparelho para abrir sem internet.
 // A página principal vem sempre da internet quando há conexão (assim as atualizações aparecem na hora);
 // sem conexão, abre a última cópia guardada.
-const CACHE = 'draft-v5';
+const CACHE = 'draft-v7';
 const BASE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const HOSTS = ['www.gstatic.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

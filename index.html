@@ -190,6 +190,14 @@ button.row:hover,.row.st:hover{background:var(--p2)}
 .av.logo img{object-fit:contain}
 .cr{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;overflow:hidden;font:900 22px/1 var(--disp);letter-spacing:.04em;background:#fff;color:#151515;flex:none}
 .cr img{width:100%;height:100%;object-fit:contain;background:#fff}
+.cr.pl{background:#111;border:2px solid var(--ln2)}
+.cr.pl img{object-fit:cover;background:#111}
+.cr.tp{background:var(--p2);color:var(--mut);font-size:18px}
+.nxt{margin-top:12px;font-size:13px;color:#c9ccd2;display:flex;gap:6px 14px;flex-wrap:wrap}
+.nxt b{font:800 12px/1.6 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.nxt button{background:none;border:0;padding:0;color:#e6e8ec;font-size:13px;text-align:left}
+.nxt button:hover{color:var(--gold)}
+.nxt time{font-family:var(--num);color:var(--gold2);margin-right:4px}
 .cr.dr{background:#000;color:#fff;border:2px solid var(--gold);text-align:center;font-size:16px}
 .cr.dr i{display:block;width:26px;height:2px;background:var(--gold);margin:3px auto}
 
@@ -629,12 +637,13 @@ const SCHEMA={
     {k:'socio',l:'Sócio responsável',t:'socio'},
     {k:'obs',l:'Observações',t:'area',full:1}]},
   agenda:{nome:'compromisso',f:[
-    {k:'titulo',l:'O que é',req:1,full:1,ph:'Reunião com a marca, gravação…'},
+    {k:'titulo',l:'O que é',req:1,full:1,ph:'Ação Amstel no Reels, reunião, gravação…'},
     {k:'data',l:'Data',t:'date',req:1},
     {k:'hora',l:'Hora',t:'time'},
-    {k:'tipo',l:'Tipo',t:'select',o:['Reunião','Gravação','Entrega','Visita','Outro']},
-    {k:'socio',l:'Sócio responsável',t:'socio'},
+    {k:'tipo',l:'Tipo',t:'select',o:['Ação para marca','Publicação','Gravação','Reunião','Entrega','Visita','Outro']},
     {k:'artista',l:'Artista',t:'artista'},
+    {k:'marca',l:'Marca',t:'marcalist'},
+    {k:'socio',l:'Sócio responsável',t:'socio'},
     {k:'local',l:'Local'},
     {k:'obs',l:'Observações',t:'area',full:1}]},
   eventos:{nome:'evento',f:[
@@ -955,7 +964,7 @@ function finMonth(m){
 const pend=tipo=>S.data.financeiro.filter(x=>x.tipo===tipo&&x.status==='Pendente');
 const monthNav=()=>`<div class="month"><button type="button" data-act="m" data-v="-1" aria-label="Mês anterior">‹</button><span>${monthLabel(S.month)}</span><button type="button" data-act="m" data-v="1" aria-label="Próximo mês">›</button></div>`;
 function upcoming(){
-  const a=S.data.agenda.map(x=>({c:'agenda',id:x.id,data:x.data,hora:x.hora||'',t:x.titulo,s:[x.tipo,socioName(x.socio),artistaName(x.artista),x.local].filter(Boolean).join(' · '),tag:x.tipo||'Compromisso',socio:x.socio}));
+  const a=S.data.agenda.map(x=>({c:'agenda',id:x.id,data:x.data,hora:x.hora||'',t:x.titulo,s:[x.tipo,artistaName(x.artista),x.marca,socioName(x.socio),x.local].filter(Boolean).join(' · '),tag:x.tipo||'Compromisso',socio:x.socio}));
   const e=S.data.eventos.filter(x=>x.data).map(x=>({c:'eventos',id:x.id,data:x.data,hora:'',t:x.nome,s:[x.marca,(x.artistas||[]).map(artistaName).filter(Boolean).join(', '),x.local].filter(Boolean).join(' · '),st:x.status,socio:x.socio}));
   const m=S.data.marcas.filter(x=>x.proximoData&&!['Fechado','Perdido'].includes(x.status)).map(x=>({c:'marcas',id:x.id,data:x.proximoData,hora:'',t:`${x.marca}: ${x.proximo||'retomar contato'}`,s:[x.contatoNome,socioName(x.socio)].filter(Boolean).join(' · '),tag:'Follow-up',socio:x.socio}));
   return a.concat(e,m).filter(x=>x.data).sort((p,q)=>(p.data+p.hora).localeCompare(q.data+q.hora));
@@ -983,7 +992,10 @@ function vGeral(){
   const f=finMonth(S.month);
   const elenco=S.data.artistas.filter(a=>a.status==='Ativo');
   const craque=elenco.slice().sort((p,q)=>(ger(q)??-1)-(ger(p)??-1)||fatOf(q)-fatOf(p))[0];
-  const prox=S.data.eventos.filter(e=>e.data&&e.data>=TODAY).sort((a,b)=>a.data.localeCompare(b.data))[0];
+  const jogos=S.data.eventos.filter(e=>e.data&&e.data>=TODAY).map(e=>({k:'ev',r:e,d:e.data,h:''}))
+    .concat(S.data.agenda.filter(g=>g.data&&g.data>=TODAY).map(g=>({k:'ag',r:g,d:g.data,h:g.hora||''})))
+    .sort((a,b)=>(a.d+(a.h||'99')).localeCompare(b.d+(b.h||'99')));
+  const prox=jogos[0];
   const scouts=S.data.artistas.filter(a=>DRAFT_COLS.includes(a.status)).sort((a,b)=>(+b.pot||0)-(+a.pot||0)||(ger(b)??0)-(ger(a)??0)).slice(0,3);
   const mk=S.data.marcas, cnt=s=>mk.filter(m=>(m.status||'A prospectar')===s).length;
   const mkAb=mk.filter(x=>!['Fechado','Perdido'].includes(x.status));
@@ -992,17 +1004,29 @@ function vGeral(){
   const msgs=mensagens(), news=noticias(), agenda=upcoming().filter(x=>x.data>=TODAY).slice(0,5), rk=ranking().slice(0,5), rmax=rk.length?rk[0].v:1;
   const tro=trofeus(),ganhos=tro.filter(x=>x.cur>=x.goal).length;
 
-  const tMatch=prox?(()=>{const as=(prox.artistas||[]).map(art).filter(Boolean),n=daysTo(prox.data);
-    return `<section class="tile t-match s8">${prox.capa?`<img src="${prox.capa}" alt="">`:'<span class="bgpat"></span>'}<div class="mi">
-      <div class="lab"><span class="k">01</span>Próximo jogo<button class="go" type="button" data-ev="${prox.id}">Ver evento →</button></div>
-      <div class="fix"><div class="side">${crestDR()}<small>Draft</small></div><div class="vs">×</div><div class="side">${crest(prox.marca||prox.nome)}<small>${esc(prox.marca||'Cliente')}</small></div></div>
-      <div class="mt"><h4>${esc(prox.nome)}</h4><p>${esc([dFull(prox.data),prox.local,prox.entregas].filter(Boolean).join(' · '))}</p></div>
-      <div class="count"><div><b>${n===0?'HOJE':pad(n)}</b><small>${n===0?'é dia de jogo':n===1?'dia':'dias'}</small></div>${prox.valor?`<div><b>${money0(prox.valor)}</b><small>contrato</small></div>`:''}<div><b>${esc((prox.status||'Prospecção').toUpperCase())}</b><small>status</small></div>
-      ${as.length?`<div class="esc">${as.slice(0,5).map(a=>av(a.foto,a.nome)).join('')}</div>`:''}</div></div></section>`})()
+  const jogoAttr=j=>j.k==='ev'?`data-ev="${j.r.id}"`:`data-open="agenda:${j.r.id}"`;
+  const tMatch=prox?(()=>{
+    const r=prox.r,ev=prox.k==='ev',n=daysTo(prox.d);
+    const as=ev?(r.artistas||[]).map(art).filter(Boolean):[art(r.artista)].filter(Boolean);
+    const a1=!ev&&as[0];
+    const left=a1?`<div class="side"><span class="cr pl">${a1.foto?`<img src="${a1.foto}" alt="">`:esc(initials(a1.nome))}</span><small>${esc(a1.nome)}</small></div>`:`<div class="side">${crestDR()}<small>Draft</small></div>`;
+    const marca=r.marca||(ev?r.nome:'');
+    const right=marca?`<div class="side">${crest(marca)}<small>${esc(r.marca||'Cliente')}</small></div>`:`<div class="side"><span class="cr tp">${esc(abbr(r.tipo||'Agenda'))}</span><small>${esc(r.tipo||'Compromisso')}</small></div>`;
+    const bg=ev&&r.capa?`<img src="${r.capa}" alt="">`:a1&&a1.foto?`<img src="${a1.foto}" alt="" style="opacity:.45;object-position:center 20%">`:'<span class="bgpat"></span>';
+    const quando=n===0?(prox.h?`HOJE ${prox.h}`:'HOJE'):pad(n);
+    const depois=jogos.slice(1,3);
+    return `<section class="tile t-match s8">${bg}<div class="mi">
+      <div class="lab"><span class="k">01</span>Próximo jogo<button class="go" type="button" ${jogoAttr(prox)}>${ev?'Ver evento':'Abrir'} →</button></div>
+      <div class="fix">${left}<div class="vs">×</div>${right}</div>
+      <div class="mt"><h4>${esc(ev?r.nome:r.titulo)}</h4><p>${esc([dFull(prox.d)+(prox.h&&n!==0?' · '+prox.h:''),r.local,ev?r.entregas:r.obs].filter(Boolean).join(' · '))}</p></div>
+      <div class="count"><div><b>${quando}</b><small>${n===0?'é dia de jogo':n===1?'dia':'dias'}</small></div>${ev&&r.valor?`<div><b>${money0(r.valor)}</b><small>contrato</small></div>`:''}<div><b>${esc((ev?(r.status||'Prospecção'):(r.tipo||'Agenda')).toUpperCase())}</b><small>${ev?'status':'tipo'}</small></div>
+      ${as.length>(a1?1:0)?`<div class="esc">${as.slice(0,5).map(x=>av(x.foto,x.nome)).join('')}</div>`:''}</div>
+      ${depois.length?`<div class="nxt"><b>Na sequência</b>${depois.map(j=>`<button type="button" ${jogoAttr(j)}><time>${gameDate(j.d)}${j.h?' '+j.h:''}</time>${esc(j.k==='ev'?j.r.nome:j.r.titulo)}${j.r.marca?' · '+esc(j.r.marca):''}</button>`).join('')}</div>`:''}
+    </div></section>`})()
     :`<section class="tile t-match s8"><span class="bgpat"></span><div class="mi"><div class="lab"><span class="k">01</span>Próximo jogo</div>
       <div class="fix"><div class="side">${crestDR()}<small>Draft</small></div><div class="vs">×</div><div class="side"><span class="cr" style="background:var(--p2);color:var(--mut)">?</span><small>Próxima marca</small></div></div>
-      <div class="mt"><h4>Nenhum jogo marcado</h4><p>Cadastre um evento com data para ele aparecer aqui com contagem regressiva.</p></div>
-      <div class="count"><button class="add" type="button" data-act="novo" data-v="eventos">+ Evento</button></div></div></section>`;
+      <div class="mt"><h4>Nenhum jogo marcado</h4><p>Cadastre um evento ou um compromisso na Agenda (uma ação de artista para uma marca, por exemplo) para ele aparecer aqui com contagem regressiva.</p></div>
+      <div class="count"><button class="add" type="button" data-act="novo" data-v="agenda" data-def="${esc(JSON.stringify({tipo:'Ação para marca'}))}">+ Ação na agenda</button><button class="btn2" type="button" data-act="novo" data-v="eventos">+ Evento</button></div></div></section>`;
 
   const tStar=craque?(()=>{const at=attrs(craque),g=ger(craque);
     return tile('t-star s4','02','Craque da temporada',[`data-prof="${craque.id}"`,'Ficha'],`<div class="star"><div><div class="ovr">${g??'–'}</div><small>GERAL${g!=null?' · '+TIER_N[tier(g)].toUpperCase():''}</small>
@@ -1500,7 +1524,7 @@ $('#btnSocios').onclick=()=>{
     <div class="fsec">Meta do mês<small>Quanto vocês querem receber de entradas por mês. Aparece na Visão geral e no Financeiro.</small></div>
     <label class="full">Meta de entradas por mês (R$)<input id="metaV" inputmode="decimal" placeholder="Ex.: 15.000" value="${S.meta.padrao?esc(String(S.meta.padrao).replace('.',',')):''}"></label>
     <div class="fsec">Instagram<small>${IG?`Conectado pela conta @${esc(IG.username||'')}. Ao colocar o @ de um artista, o painel busca foto, seguidores e engajamento sozinho.`:'Cole aqui o token gerado no painel da Meta para o painel buscar foto e números dos artistas pelo @.'}</small></div>
-    <label class="full">Token de acesso da Meta<textarea id="igToken" placeholder="EAAG…" autocomplete="off" spellcheck="false">${''}</textarea></label>
+    <label class="full">Token de acesso da Meta<textarea id="igToken" placeholder="IGAA… ou EAAG…" autocomplete="off" spellcheck="false">${''}</textarea></label>
     <div class="full actions" style="margin:0"><button type="button" class="btn2" id="igCon">${IG?'Trocar token':'Conectar Instagram'}</button>${IG?'<button type="button" class="del" id="igOff">Desconectar</button>':''}<span class="hint" id="igMsg"></span></div>
   </div>
   <div class="actions"><span class="sp"></span><span class="hint" id="ind">Salva sozinho</span><button class="add" type="submit">Pronto</button></div></form>`;
@@ -1513,7 +1537,7 @@ $('#btnSocios').onclick=()=>{
     const tok=$('#igToken').value.trim(),msg=$('#igMsg');
     if(!tok){msg.textContent='Cole o token primeiro.';return}
     msg.textContent='Conectando…';
-    try{const r=await igConnect(tok);await put('config','instagram',{token:tok,igId:r.igId,username:r.username,em:new Date().toISOString()});IG={token:tok,igId:r.igId,username:r.username};msg.textContent='Conectado como @'+r.username+'.';$('#igToken').value='';igAutoDone=false;igAuto()}
+    try{const r=await igConnect(tok);await put('config','instagram',{token:tok,igId:r.igId,username:r.username,host:r.host,em:new Date().toISOString()});IG={token:tok,igId:r.igId,username:r.username,host:r.host};msg.textContent='Conectado como @'+r.username+'.';$('#igToken').value='';igAutoDone=false;igAuto()}
     catch(x){msg.textContent=x&&x.code===190?'Token inválido ou expirado. Gere outro.':'Não foi possível conectar: '+((x&&x.message)||'erro desconhecido')}
   };
   const off=$('#igOff');if(off)off.onclick=async()=>{await remove('config','instagram');IG=null;close();toast('Instagram desconectado')};
@@ -1524,20 +1548,24 @@ $('#btnSocios').onclick=()=>{
 /* ---------- Instagram (API oficial da Meta: Business Discovery) ---------- */
 let IG=null, igAutoDone=false;
 const GV='v21.0';
-async function igApi(path,params){
-  const u=new URL(`https://graph.facebook.com/${GV}/${path}`);
+async function igApi(path,params,host){
+  const u=new URL(`https://${host||(IG&&IG.host)||'graph.facebook.com'}/${GV}/${path}`);
   Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
   const r=await fetch(u);const j=await r.json().catch(()=>({error:{message:'Resposta inválida'}}));
   if(j.error)throw j.error;return j;
 }
 async function igConnect(token){
+  if(/^IG/.test(token)){ // token do login pelo Instagram (sem Facebook)
+    const me=await igApi('me',{fields:'user_id,username',access_token:token},'graph.instagram.com');
+    return{igId:me.user_id||me.id,username:me.username,host:'graph.instagram.com'};
+  }
   try{const me=await igApi('me',{fields:'instagram_business_account{id,username}',access_token:token});
-    if(me.instagram_business_account)return{igId:me.instagram_business_account.id,username:me.instagram_business_account.username}}
+    if(me.instagram_business_account)return{igId:me.instagram_business_account.id,username:me.instagram_business_account.username,host:'graph.facebook.com'}}
   catch(e){if(e.code===190)throw e}
   const acc=await igApi('me/accounts',{fields:'name,instagram_business_account{id,username}',access_token:token});
   const p=(acc.data||[]).find(x=>x.instagram_business_account);
   if(!p)throw{message:'nenhuma conta profissional do Instagram ligada a uma página do Facebook neste token.'};
-  return{igId:p.instagram_business_account.id,username:p.instagram_business_account.username};
+  return{igId:p.instagram_business_account.id,username:p.instagram_business_account.username,host:'graph.facebook.com'};
 }
 async function igLookup(h){
   if(!IG)throw{message:'Instagram não conectado'};
