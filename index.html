@@ -57,6 +57,8 @@ a{color:inherit}
 .hb{background:var(--p);border:1px solid var(--ln);color:var(--fg);padding:7px 11px;font:700 13px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,0 100%)}
 .hb:hover{border-color:var(--ln2);background:var(--p2)}
 .hb.on{background:var(--gold);color:var(--acc-ink)}
+.hb.eye{display:grid;place-items:center;padding:5px 9px;color:var(--gold)}
+.hb.eye svg{display:block}
 @media (max-width:900px){.hide-md{display:none!important}}
 @media (max-width:520px){.hcell.season{display:none}}
 @media (max-width:620px){.hide-sm{display:none!important}.logo{padding-right:12px}.logo b{font-size:22px}.hcell{padding:0 12px}.hbtns{padding-left:10px;margin-left:auto}.hb{padding:7px 8px}}
@@ -543,7 +545,7 @@ body.has-music .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
       <div class="sp"></div>
       <div class="hcell r hide-md"><small>Hoje</small><b id="hDate">–</b></div>
       <div class="hcell r hide-sm"><small>Caixa do mês</small><b id="hCash">–</b></div>
-      <div class="hbtns"><button class="hb" id="btnMusica" type="button" aria-label="Música">♫<span class="hide-sm"> Música</span></button><button class="hb" id="btnSocios" type="button">Ajustes</button><button class="hb" id="btnSair" type="button" title="Sair">Sair</button></div>
+      <div class="hbtns"><button class="hb eye" id="btnPriv" type="button" aria-pressed="false" aria-label="Mostrar valores" title="Mostrar ou esconder valores"></button><button class="hb" id="btnMusica" type="button" aria-label="Música">♫<span class="hide-sm"> Música</span></button><button class="hb" id="btnSocios" type="button">Ajustes</button><button class="hb" id="btnSair" type="button" title="Sair">Sair</button></div>
     </div>
   </div>
 </header>
@@ -691,7 +693,9 @@ const TODAY=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}
 const YEAR=TODAY.slice(0,4);
 S.month=TODAY.slice(0,7);
 const brl=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
-const money=v=>brl.format(Number(v)||0);
+let PRIV=(()=>{try{return localStorage.getItem('draft_priv')!=='0'}catch(e){return true}})();
+const OCULTO='R$ •••••';
+const money=v=>PRIV?OCULTO:brl.format(Number(v)||0);
 const compact=new Intl.NumberFormat('pt-BR',{notation:'compact',maximumFractionDigits:1});
 const num=v=>(+v||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -766,6 +770,7 @@ function media(text,title){
 /* ---------- navegação ---------- */
 const tabs=$('#tabs'), view=$('#view'), view2=$('#view2'), mslot=$('#mslot'), main=$('#main');
 tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tab]');if(b)go(b.dataset.tab)});
+$('#btnPriv').onclick=()=>{PRIV=!PRIV;try{localStorage.setItem('draft_priv',PRIV?'1':'0')}catch(e){}render()};
 const TABS=['geral','artistas','marcas','agenda','eventos','financeiro','dicas'];
 function step(k){const i=TABS.indexOf(S.tab);go(TABS[(i+k+TABS.length)%TABS.length]);const b=tabs.querySelector(`[data-tab="${S.tab}"]`);if(b)b.scrollIntoView({inline:'center',block:'nearest'})}
 document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>step(+b.dataset.step));
@@ -826,9 +831,11 @@ main.addEventListener('input',e=>{if(e.target.id==='qArt'){S.q=e.target.value;el
 main.addEventListener('change',e=>{if(e.target.id==='sortArt'){S.sort=e.target.value;elencoGrid()}});
 
 /* ---------- HUD ---------- */
-const money0=v=>(v<0?'−':'')+'R$ '+Math.abs(Math.round(+v||0)).toLocaleString('pt-BR');
+const money0=v=>PRIV?OCULTO:(v<0?'−':'')+'R$ '+Math.abs(Math.round(+v||0)).toLocaleString('pt-BR');
 function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)}
 function hud(){
+  const pb=$('#btnPriv');pb.setAttribute('aria-pressed',String(!PRIV));pb.setAttribute('aria-label',PRIV?'Mostrar valores':'Esconder valores');
+  pb.innerHTML=PRIV?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>':'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   const d=new Date();
   $('#hDate').textContent=`${DOW[d.getDay()].toUpperCase()} ${pad(d.getDate())}.${pad(d.getMonth()+1)}`;
   $('#hSeason').innerHTML=`${YEAR} · <em>Semana ${isoWeek(d)}</em>`;
@@ -1320,7 +1327,7 @@ function chart(){
   const max=Math.max(1,...d.map(x=>Math.max(x.ent,x.sai)));
   const nice=(()=>{const p=Math.pow(10,Math.floor(Math.log10(max)));const s=[1,2,2.5,5,10].find(s=>s*p>=max);return s*p})();
   const W=600,H=190,L=56,B=26,T=10,ch=H-B-T,cw=(W-L-8)/6,bw=Math.min(22,cw/3.2);
-  const y=v=>T+ch-(v/nice)*ch, kfmt=v=>v>=1000?(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil':String(v);
+  const y=v=>T+ch-(v/nice)*ch, kfmt=v=>PRIV?'•••':v>=1000?(v/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mil':String(v);
   let g='';
   [0,.5,1].forEach(r=>{const v=nice*r;g+=`<line x1="${L}" x2="${W-8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${kfmt(v)}</text>`});
   const pts=[];
