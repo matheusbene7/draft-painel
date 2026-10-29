@@ -1615,7 +1615,8 @@ async function igAuto(){
 }
 
 /* ---------- música (Spotify) ---------- */
-const PLAYLIST_DRAFT='https://open.spotify.com/playlist/37i9dQZF1DZ06evO4n3RKO';
+const RETIRADA='37i9dQZF1DZ06evO4n3RKO'; // playlist antiga, não usar mais
+try{if((localStorage.getItem('draft_mu_atual')||'').includes(RETIRADA))localStorage.removeItem('draft_mu_atual')}catch(e){}
 const music=$('#music'),muPickEl=$('#muPick'),muNow=$('#muNow');
 let SPAPI=null,SPC=null,muCur='',muStarted=false,muWant=false,MU={padrao:'',favoritos:[]};
 const LSg=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, LSs=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
@@ -1625,11 +1626,10 @@ function spParse(v){
   const m=v.match(/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(?:embed\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]+)/)||v.match(/^spotify:(playlist|album|track|artist|show|episode):([A-Za-z0-9]+)$/);
   return m?{tipo:m[1],id:m[2],uri:`spotify:${m[1]}:${m[2]}`,link:`https://open.spotify.com/${m[1]}/${m[2]}`,src:`https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator&theme=0`}:null;
 }
-const muPadrao=()=>MU.padrao||PLAYLIST_DRAFT;
+const muPadrao=()=>(MU.padrao&&!MU.padrao.includes(RETIRADA))?MU.padrao:'';
 const muAuto=()=>LSg('draft_mu_auto')!=='0';
 async function spNome(link){
   const fav=(MU.favoritos||[]).find(f=>spParse(f.link)?.uri===spParse(link)?.uri);if(fav)return fav.nome;
-  if(spParse(link)?.uri===spParse(muPadrao())?.uri&&!MU.padraoNome)return 'Playlist da DRAFT';
   try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(spParse(link).link));if(r.ok){const j=await r.json();if(j.title)return j.title}}catch(e){}
   return (spParse(link)?.uri===spParse(muPadrao())?.uri&&MU.padraoNome)||TIPO[spParse(link)?.tipo]||'Música';
 }
@@ -1653,13 +1653,13 @@ function muArm(){
 }
 function muOpen(play){
   music.hidden=false;document.body.classList.add('has-music');
-  if(!muCur)muLoad(LSg('draft_mu_atual')||muPadrao(),play);
+  if(!muCur){const l=LSg('draft_mu_atual')||muPadrao();if(l)muLoad(l,play);else{muNow.textContent='Escolha a playlist';muPick()}}
   else if(play&&SPC)SPC.play();
 }
 function muPick(msg){
-  const favs=MU.favoritos||[],cur=spParse(muCur)?.uri,isPad=cur===spParse(muPadrao())?.uri;
+  const favs=(MU.favoritos||[]).filter(f=>!String(f.link).includes(RETIRADA)),cur=spParse(muCur)?.uri,pad=muPadrao(),isPad=!!pad&&cur===spParse(pad)?.uri;
   muPickEl.innerHTML=`<small>Favoritos da DRAFT</small>
-    <div class="mu-fav"><button type="button" data-mu="${esc(muPadrao())}" class="${isPad?'on':''}">★ ${esc(MU.padraoNome||'Playlist da DRAFT')} <em>padrão</em></button>
+    <div class="mu-fav">${pad?`<button type="button" data-mu="${esc(pad)}" class="${isPad?'on':''}">★ ${esc(MU.padraoNome||'Playlist da DRAFT')} <em>padrão</em></button>`:''}${!pad&&!favs.length?'<span class="hint">Nenhuma playlist salva ainda. Cole o link abaixo e depois toque em “Usar como padrão do painel”.</span>':''}
       ${favs.map((f,i)=>`<button type="button" data-mu="${esc(f.link)}" class="${spParse(f.link)?.uri===cur?'on':''}">${esc(f.nome)} <em>${esc(TIPO[spParse(f.link)?.tipo]||'')}</em></button><button type="button" class="x" data-murm="${i}" aria-label="Tirar ${esc(f.nome)} dos favoritos">×</button>`).join('')}</div>
     <form class="mrow" id="muForm"><input id="muLink" placeholder="Cole o link de uma playlist, artista, álbum ou música" autocomplete="off" aria-label="Link do Spotify"><button class="add" type="submit">Tocar</button></form>
     <div class="mrow"><a href="https://open.spotify.com/search" target="_blank" rel="noopener">Procurar artista no Spotify ↗</a><span class="hint">Abra o artista, toque em ··· → Compartilhar → Copiar link e cole acima.</span></div>
@@ -1781,7 +1781,7 @@ function start(){
     if(c==='artistas'&&!snap.metadata.fromCache)igAuto();
   },e=>{if(e.code==='permission-denied')showStatus('Seu e-mail ('+(auth.currentUser&&auth.currentUser.email)+') não está liberado neste painel. Peça a um sócio para adicionar nas regras do Firebase.');else showStatus('A conexão com os dados caiu. Recarregue a página.')})));
   unsubs.push(db.doc('config/instagram').onSnapshot(s=>{IG=s.exists&&s.data().token?s.data():null;igAuto()},()=>{}));
-  unsubs.push(db.doc('config/musica').onSnapshot(s=>{MU=s.exists?{favoritos:[],...s.data()}:{padrao:'',favoritos:[]}},()=>{}));
+  unsubs.push(db.doc('config/musica').onSnapshot(s=>{MU=s.exists?{favoritos:[],...s.data()}:{padrao:'',favoritos:[]};if(muAuto()&&music.hidden&&!muCur&&muPadrao()&&loginEl.hidden){muOpen(false);muArm()}},()=>{}));
   unsubs.push(db.doc('config/metas').onSnapshot(s=>{S.meta=s.exists?s.data():{};softRender()},()=>{}));
   unsubs.push(db.doc('config/socios').onSnapshot(s=>{if(s.exists&&Array.isArray(s.data().nomes)){S.socios=s.data().nomes.slice(0,3);softRender()}},()=>{}));
   seedOnce();
@@ -1790,7 +1790,7 @@ auth.onAuthStateChanged(u=>{
   $('#btnSair').title=u?'Sair ('+u.email+')':'Sair';
   if(!u){unsubs.forEach(f=>f());unsubs=[];COLLS.forEach(c=>S.data[c]=[]);loginEl.hidden=false;render();return}
   loginEl.hidden=true;forced='';showStatus();start();
-  if(muAuto()&&music.hidden){muOpen(false);muArm()}
+  if(muAuto()&&music.hidden&&(LSg('draft_mu_atual')||MU.padrao)){muOpen(false);muArm()}
 });
 render();showStatus();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
